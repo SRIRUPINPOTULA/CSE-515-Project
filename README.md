@@ -19,6 +19,7 @@ In directory task-5, `Task-5.ipynb` file has been added that measures the `m=10`
 # 2. Output:
 
 ## 2.1 Task-1 Output: 
+### 2.1.1 Features of Target Videos:
 In the output directory, the directory `Task-4` contains the output of the code made for `Task-1_Output`. Each of the json files represents the target actions. The mapping of them to the target videos are listed below:
 
 Output of action type sword => `sword_output.json`
@@ -32,3 +33,5 @@ Output of action type ride_bike => `ridebikeoutput.json`
 Output of action type sword_excercise => `swordexercise_output.json`
 
 Output of action type wave => `wave_output.json`
+### 2.1.2 Nearest Videos Search:
+The file 'output_task1.json' contains the sample input's and it's corresponding '10' videos with the distance measure.
