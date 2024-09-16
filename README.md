@@ -1,6 +1,6 @@
 # CSE 515 - Multimedia and Web Databases 
 
-# Title: 
+# Title: Action Classification
 
 # Repo Directory Structure:
 
