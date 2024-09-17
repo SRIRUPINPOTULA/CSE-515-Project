@@ -45,6 +45,8 @@ Output of action type drink => `drink_output.json`
 
 Output of action type ride_bike => `ridebikeoutput.json`
 
+### 2.1.1 Output for Input Videos:
+
 In the output directory, the directory `Task-5` contains the output of the code made for task-1. The output for the sample videa=os are located at `output_task1.json`. 
 
 ## 2.2 Task-2 Output: 
