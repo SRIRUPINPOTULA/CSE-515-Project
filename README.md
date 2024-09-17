@@ -25,8 +25,11 @@ In directory task-2, `Task 2.ipynb` file has been added, corresponding to the co
 In directory task-4, `Task-4.ipynb` file was added, corresponding to the code used to generate the output for all the videos of target videos. The outputs are exported to JSON which is part of `Output\Task-4\Task-1_Output`.
 
 ## 1.5 Task-5:  
-In directory task-5, `Task-5.ipynb` file has been added that measures the `m=10` similar videos for the video file given using the JSON of Task-4 and using the logic of Task-1. The nearest search videos for the sample inputs have been printed there along with the distance
+In directory task-5, `Task-5.ipynb` file has been added that measures the `m=10` similar videos for the video file given using the JSON of Task-4 and using the logic of Task-1. The nearest search videos for the sample inputs have been printed there along with the distance. 
 
+In directory task-5, `Task_5(using task 3).ipynb` file has been added that measures m similar videos using the logic of task-3.
+
+In directory task-5, `Task 5_2.ipynb` file has been added that measures m similar videos using the logic of task-2.
 
 # 2. Output:
 
