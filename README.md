@@ -53,5 +53,9 @@ In the output directory, the directory `Task-5` contains the output of the code 
 ### 2.2.1 Features of Target Video:
 In the output directory, the directory `Task-4` contains the output of the code made for `Task-2_Output`. This directory consists of a directory of all the actions that are listed as target videos. And in each action directory for each input video, the output is stored as JSON.
 
+### 2.2.2 Output for Input Videos:
+
+In the directory, `Task-5` the folder `Output_Task_2` contains the HoF and HoG for the videos. The output files for HoG and HoF which contains the HoG and HoF for two input videos.
+
 ## 2.3 Task-3 Output:
 Using the csv method (Task_3_csv_method.ipynb), `Output/Task-4/Task_4_using_3` has 6 folders, of each action type. Each folder consists of csv file in the nomemclature format of "{video_name}histogram_frame{i}.csv". "i" is the frame number. The csv file contains the histogram vectors made using "r"=4 and "n"=12, "r" and "n" are resolution and bin count respectively.`Output/Task-4/Task_4_using_3/Histogram` plots for sample input videos folder contains the histograms for the 4 input sample videos.  Using csv method, `Output/Task-5/Output_task3/Task-5`(using task 3).docx is a document which has the screenshots which we get for the particular task. The name of "m" most similar videos are displayed along with their similarity scores.
