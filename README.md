@@ -33,4 +33,4 @@ Output of action type ride_bike => `ridebikeoutput.json`
 
 ## 2.2 Task-2 Output: 
 ### 2.2.1 Features of Target Video:
-In the output directory, the directory `Task-4` contains the output of the code made for `Task-2_Output`. This directory consists of a directory of the target videos which indeed has the all features in JSON Format.
+In the output directory, the directory `Task-4` contains the output of the code made for `Task-2_Output`. This directory consists of a directory of all the actions that are listed as target videos. And in each action directory for each input video, the output is stored as JSON.
