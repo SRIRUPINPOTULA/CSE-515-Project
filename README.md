@@ -14,6 +14,9 @@ The videos are divided into target and non_target videos. So, during the executi
 ## 1.1 Task -1: 
 In directory task-1, `Task-1.ipynb` file has been added, corresponding to the code and output for Task-1. In this Python file itself, the outputs of the sample inputs have been printed.
 
+## 1.2 Task -2:
+In directory task-2, `Task 2.ipynb` file has been added, corresponding to the code and output for Task-2.
+
 ## 1.3 Task -3: 
 
 `Task_3_csv_method.ipynb`, `Task_3_histogram_png_plots.ipynb` are added which are used to obtain vector forms of the histograms in the form of csv file while the `Task_3_histogram_png_plots.ipyn`b is used to get the png output of histograms. csv output files are smaller, easier to compute hence used for the entire phase. PNG files are more visual but size is drastically huge and difficult to use them for computation. Output\task-3\Task_4_using_3 is the folder which consists of the output csvs. They have been zipped for easier uploading as well as downloading.
