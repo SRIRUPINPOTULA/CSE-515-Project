@@ -2,8 +2,13 @@
 
 # Title: Action Classification
 
-# Repo Directory Structure:
+# Data
 
+The videos are divided into target and non_target videos. So, during the execution of the programs the input video file names are based on the location of the videos. 
+
+`Example Usage: sample_input_1 = '/Users/srirupin/Downloads/target/cartwheel/Bodenturnen_2004_cartwheel_f_cm_np1_le_med_0.avi'`
+
+# Repo Directory Structure:
 # 1.Code Directory: 
 
 ## 1.1 Task -1: 
