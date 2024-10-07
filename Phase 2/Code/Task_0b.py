@@ -1,11 +1,46 @@
 import json
+import cv2
+
+def visualise(video_file):
+    with open('../database/total_target_features.json', 'r') as f:
+        target_data = json.load(f)
+    with open('../database/total_non_target_features.json', 'r') as f:
+        non_target_data = json.load(f)
+    found=False
+    for video in target_data:
+        if video_file in video:
+            video_path = f'../dataset/target_videos/{video_file}'
+            found=True
+            break
+    if found ==False:
+        for video in non_target_data:
+            if video_file in video:
+                video_path = f'../dataset/non_target_videos/{video_file}'
+                found=True
+                break
+    print("The video path", video_path)
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("Couldnot read the video")
+        return
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # Visualizing the video frame using OpenCV
+        cv2.imshow("The captured frame is: ", frame)
+        if cv2.waitKey(30) & 0xFF == ord('q'):
+            break
+    
+    # Release and destroy the windows
+    cap.release()
+    cv2.destroyAllWindows()
 
 def euclidean(a, b):
     distance_res=0
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
         return distance_res ** 0.5
-
 
 def layer3_implementation(query_video, layer_number, l):
     found = False
@@ -47,8 +82,14 @@ def layer3_implementation(query_video, layer_number, l):
             res.append((distance, key))
     res.sort(key=lambda i:i[0])
     print("******The \"m\" most similar videos are: ********")
-    for i in range(0,20):
+    video_name = []
+    #for i in range(0,20):
+    for i in range(0, l):
         print(f'{res[i][1]} : {res[i][0]}')
+        video_name.append(res[i][1])
+    for i in video_name:
+        visualise(i)
+        
     
 def main():
     input_type = int(input("Provide the 1 - Video File Name or 2 - VideoID: "))
