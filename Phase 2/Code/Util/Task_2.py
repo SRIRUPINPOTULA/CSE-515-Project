@@ -21,8 +21,8 @@ tau_values = [2, 4]
 sigma_values = [4, 8, 16, 32, 64, 128]
 
 
-def get_cluster_representatives():
-    non_target_path = '../../dataset_stips/non_target_videos'
+def create_cluster_representatives():
+    non_target_path = '../dataset_stips/non_target_videos'
 
     # Array to store 400 highest confidence STIPs for each non-target video
     non_target_data = []
@@ -69,12 +69,10 @@ def get_cluster_representatives():
             HOF_centers[str((t, s))] = kmeans.cluster_centers_.tolist()
 
     # Export the Cluster Representatives
-    with open("HoG_cluster_representatives.json", "w") as fp:
+    with open("Util/HoG_cluster_representatives.json", "w") as fp:
         json.dump(HOG_centers, fp)
-    with open("HoF_cluster_representatives.json", "w") as fp:
+    with open("Util/HoF_cluster_representatives.json", "w") as fp:
         json.dump(HOF_centers, fp)
-    
-    return HOG_centers, HOF_centers
 
 
 def find_closest_clusters(x, y):
@@ -84,7 +82,7 @@ def find_closest_clusters(x, y):
 
 def get_HoG_HoF_features(target_path):
     try:
-        df = pd.read_csv('../' + target_path, sep="\t", comment='#', header=None)
+        df = pd.read_csv(target_path, sep="\t", comment='#', header=None)
         df = df.nlargest(400, 6)
         df = df.dropna(axis=1)
         df.columns = stip_column_labels
@@ -108,8 +106,8 @@ def get_HoG_HoF_features(target_path):
                 hof_histogram, bin_edges = np.histogram(hof_cluster_Id, bins=np.arange(41))
 
             elif filtered_df.shape[0] != 0:
-                    hog_histograms.append(numpy.zeros(480))
-                    hof_histograms.append(numpy.zeros(480))
+                    hog_histograms.append(np.zeros(480))
+                    hof_histograms.append(np.zeros(480))
 
             hog_histograms.append(hog_histogram)
             hof_histograms.append(hof_histogram)
@@ -118,3 +116,5 @@ def get_HoG_HoF_features(target_path):
     bof_HOF_descriptor = np.concatenate(hof_histograms)
 
     return bof_HOG_descriptor, bof_HOF_descriptor
+
+create_cluster_representatives()

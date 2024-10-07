@@ -239,6 +239,3 @@ def avgpool_feature(video_file_path):
     maxpooling_output = torch.max(stack_layers, dim=0).values
     output_current_layer = maxpooling_output.view(512)
     return output_current_layer.tolist()
-
-sample_input_1 = '/Users/srirupin/Downloads/target/cartwheel/Bodenturnen_2004_cartwheel_f_cm_np1_le_med_0.avi'
-layer3_feature(sample_input_1)

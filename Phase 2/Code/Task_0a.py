@@ -6,17 +6,12 @@ import json
 import sqlite3
 
 # import the python libraries
-import cv2
-import torch
-import torchvision.transforms as transforms
-import torchvision.models as models
-import torch.nn as nn
+import numpy as np
 
 # import functions to generate feature spaces
 from Util.Task_1 import layer3_feature
 from Util.Task_1 import layer4_feature
 from Util.Task_1 import avgpool_feature
-from Util.Task_2 import get_cluster_representatives
 from Util.Task_2 import get_HoG_HoF_features
 
 target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
@@ -29,16 +24,12 @@ videoID = {}
 # Dictionary to map video name to Action
 actionmap = {}
 
-# Dictionaries to map (tau, sigma) values to Cluster Representatives
-HoG = {}
-HoF = {}
-
 
 # Connect to the database
 connection = sqlite3.connect('../database/Phase_2.db')
 c = connection.cursor()
 
-# Create database Tables
+# Create database tables
 create_data_table = """CREATE TABLE IF NOT EXISTS data (
                     videoID INTEGER PRIMARY KEY,
                     Video_Name VARCHAR(250),
@@ -48,6 +39,16 @@ create_data_table = """CREATE TABLE IF NOT EXISTS data (
                     BOF_HOG VARCHAR(4000),
                     BOF_HOF VARCHAR(4000),
                     Action_Label VARCHAR(20));"""
+
+                    # """CREATE TABLE IF NOT EXISTS data (
+                    # videoID INTEGER PRIMARY KEY,
+                    # Video_Name TEXT NOT NULL,
+                    # Layer_3 TEXT,
+                    # Layer_4 TEXT,
+                    # AvgPool TEXT,
+                    # BOF_HOG TEXT,
+                    # BOF_HOF TEXT,
+                    # Action_Label TEXT);"""
 
 # TODO: create table for P1_Task3
 # create_color_hist_table = """CREATE TABLE IF NOT EXISTS color_hist_data ();"""
@@ -82,8 +83,6 @@ def video_category_map():
                     a = {}
                     a[file] = action
                     actionmap.update(a)
-        elif action == '.DS_Store':
-            continue
     
     # JSON is used as a backup to data
     with open('../database/category_map.json', 'w') as f:
@@ -92,26 +91,26 @@ def video_category_map():
 
 def target_videos_features():
     target_path = '../dataset/target_videos'
-    layer_output = []
+    target_feature = []
     for target_videos in os.listdir(target_path):
         video_path = os.path.join(target_path, target_videos)
 
-        a = {}
-        features_video =[]
+        video_features_map = {}
+        video_features = []
 
         layer_3 = layer3_feature(video_path)
-        features_video.append(layer_3)
+        video_features.append(layer_3)
         layer_4 = layer4_feature(video_path)
-        features_video.append(layer_4)
+        video_features.append(layer_4)
         avgPool = avgpool_feature(video_path)
-        features_video.append(avgPool)
+        video_features.append(avgPool)
         bof_HOG, bof_HOF = get_HoG_HoF_features('../dataset_stips/target_videos/' + target_videos + '.txt')
-        features_video.append(bof_HOG)
-        features_video.append(bof_HOF)
+        video_features.append(bof_HOG.tolist())
+        video_features.append(bof_HOF.tolist())
         # TODO: Add Task3 Features
 
-        a[target_videos] = features_video
-        layer_output.append(a)
+        video_features_map[target_videos] = video_features
+        target_feature.append(video_features_map)
 
         if videoID[target_videos]%2 == 0:
             video_insert = f"INSERT INTO data VALUES({videoID[target_videos]}, '{target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', '{actionmap[target_videos]}');"
@@ -120,37 +119,37 @@ def target_videos_features():
         c.execute(video_insert)
     
     with open('../database/total_target_features.json', 'w') as f:
-        json.dump(layer_output, f, indent=4)
+        json.dump(target_feature, f, indent=4)
 
 
 def non_target_videos_features():
     non_target_path = '../dataset/non_target_videos'
-    layer_output = []
+    non_target_feature = []
     for non_target_videos in os.listdir(non_target_path):
         video_path = os.path.join(non_target_path, non_target_videos)
 
-        a = {}
-        features_video =[]
+        video_features_map = {}
+        video_features = []
 
         layer_3 = layer3_feature(video_path)
-        features_video.append(layer_3)
+        video_features.append(layer_3)
         layer_4 = layer4_feature(video_path)
-        features_video.append(layer_4)
+        video_features.append(layer_4)
         avgPool = avgpool_feature(video_path)
-        features_video.append(avgPool)
-        bof_HOG, bof_HOF = get_HoG_HoF_features('../dataset_stips/non_target_videos/' + target_videos + '.txt')
-        features_video.append(bof_HOG)
-        features_video.append(bof_HOF)
+        video_features.append(avgPool)
+        bof_HOG, bof_HOF = get_HoG_HoF_features('../dataset_stips/non_target_videos/' + non_target_videos + '.txt')
+        video_features.append(bof_HOG.tolist())
+        video_features.append(bof_HOF.tolist())
         # TODO: Add Task3 Features
 
-        a[target_videos] = features_video
-        layer_output.append(a)
+        video_features_map[non_target_videos] = video_features
+        non_target_feature.append(video_features_map)
 
-        video_insert = f"INSERT INTO data VALUES({videoID[target_videos]}, '{target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', NULL);"
+        video_insert = f"INSERT INTO data VALUES({videoID[non_target_videos]}, '{non_target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', NULL);"
         c.execute(video_insert)
 
     with open('../database/total_non_target_features.json', 'w') as f:
-        json.dump(layer_output, f, indent=4)
+        json.dump(non_target_feature, f, indent=4)
 
 
 # Move all videos from 'hmdb51_org' to 'dataset/target_videos' and 'dataset/non_target_videos'
@@ -176,7 +175,7 @@ def move_videos():
             for all_videos in os.listdir(video_path):
                 file_name = os.path.join(video_path, all_videos)
                 shutil.copy(file_name, destination_dir)
-        elif video_dir == '.DS_Store':
+        elif video_dir == '.DS_Store' or video_dir == '.gitkeep':
             continue
         else:
             video_path = f'{path}/{video_dir}'
@@ -209,7 +208,7 @@ def move_stips():
             for all_videos in os.listdir(video_path):
                 file_name = os.path.join(video_path, all_videos)
                 shutil.copy(file_name, destination_dir)
-        elif video_dir == '.DS_Store':
+        elif video_dir == '.DS_Store' or video_dir == '.gitkeep':
             continue
         else:
             video_path = f'{path}/{video_dir}'
@@ -224,12 +223,11 @@ move_stips()
 
 create_video_id()
 video_category_map()
-HoG, HoF = get_cluster_representatives()
 target_videos_features()
 non_target_videos_features()
 
-# commit the changes
+# commit the database changes
 connection.commit()
 
-# close the Database connection
+# close the database connection
 connection.close()
