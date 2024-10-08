@@ -12,6 +12,7 @@ import numpy as np
 from Util.Task_1 import layer3_feature
 from Util.Task_1 import layer4_feature
 from Util.Task_1 import avgpool_feature
+from Util.Task_2 import create_cluster_representatives
 from Util.Task_2 import get_HoG_HoF_features
 
 target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
@@ -221,6 +222,7 @@ def move_stips():
 move_videos()
 move_stips()
 
+create_cluster_representatives()
 create_video_id()
 video_category_map()
 target_videos_features()

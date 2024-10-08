@@ -116,5 +116,3 @@ def get_HoG_HoF_features(target_path):
     bof_HOF_descriptor = np.concatenate(hof_histograms)
 
     return bof_HOG_descriptor, bof_HOF_descriptor
-
-create_cluster_representatives()
