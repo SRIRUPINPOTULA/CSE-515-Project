@@ -3,11 +3,13 @@ import cv2
 import torch
 import torchvision.transforms as transforms
 import torchvision.models as models
+from torchvision.models import video
 import torch.nn as nn
 
 
 # Load the pre-trained model and sift to eval mode
-model = models.video.r3d_18(pretrained=True)
+#model = models.video.r3d_18(pretrained=True)
+model = video.r3d_18(weights=video.R3D_18_Weights.DEFAULT)
 model.eval()
 #Defining the hook for the output
 def output_hook(desired_layers):
