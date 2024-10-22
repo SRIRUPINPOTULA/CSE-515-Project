@@ -41,7 +41,8 @@ This directory consists of two more directories which are target_videos and non_
 todo
 
 ## 5.hmdb51_org:
-This directory consists all the original data videos.
+
+This directory consists all the original data videos of each category label.
 
 ## 6.hmdb51_org_stips:
 
@@ -49,3 +50,8 @@ todo
 
 # Execution:
 
+Inorder to execute the the files, we have chosen to use terminal execution. The command for execution is `python3 <filename>`.
+
+
+# Libraries:
+`OpenCV`, `Pytorch`, `SQLite`.
