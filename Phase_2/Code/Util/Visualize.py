@@ -4,27 +4,34 @@ import numpy as np
 # import SQL library
 import sqlite3
 
-connection = sqlite3.connect('../../database/Phase_2.db')
-c = connection.cursor()
 
-get_HoG_value = """SELECT BOF_HOG FROM data WHERE videoID = 10;"""
-get_HoF_value = """SELECT BOF_HOF FROM data WHERE videoID = 1;"""
+def get_video_features(feature, video_name):
 
-c.execute(get_HoG_value)
-rows = c.fetchall()
+    connection = sqlite3.connect('../database/Phase_2.db')
+    c = connection.cursor()
 
-cleaned_str = rows[0][0].strip("[]")
-number_list = list(map(int, cleaned_str.split()))
+    get_query = f"SELECT {feature} FROM data WHERE Video_Name = '{video_name}';"
 
-data = np.array(number_list).reshape(12, 40)
+    c.execute(get_query)
+    rows = c.fetchall()
 
-def Visualize_HoG_HoF(data):
+    connection.close()
+
+    cleaned_str = rows[0][0].strip("[]")
+    number_list = list(map(int, cleaned_str.split()))
+
+    data = np.array(number_list).reshape(12, 40)
+    return data
+
+def Visualize_HoG_HoF(feature, video_name):
+
+    data = get_video_features(feature, video_name)
+
     tau_values = [2, 4]
     sigma_values = [4, 8, 16, 32, 64, 128]
 
     fig, axes = plt.subplots(3, 4, figsize=(12, 8))
 
-    # Flatten the axes array for easy iteration
     axes = axes.flatten()
 
     i = 0
@@ -34,18 +41,6 @@ def Visualize_HoG_HoF(data):
             axes[i].set_title(f'Histogram for tau={t} sigma={s}')
             i += 1
 
-    # Adjust layout for better spacing
     plt.tight_layout()
-
-    # Display the histograms
+    
     plt.show()
-
-def Visualize_HoG(videoID):
-    print('x')
-
-def Visualize_HoF(videoID):
-    print('x')
-
-Visualize_HoG_HoF()
-
-connection.close()

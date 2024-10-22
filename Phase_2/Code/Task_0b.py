@@ -1,14 +1,26 @@
 import json
 import cv2
-#Phase-2/dataset/non_target_videos/_Art_of_the_Drink__Flaming_Zombie_pour_u_nm_np2_fr_med_1.avi
+
+import numpy as np
+from scipy.spatial.distance import cdist
+from prettytable import PrettyTable
+
+import sqlite3
+
+from Util.Visualize import Visualize_HoG_HoF
+
+with open('../database/videoID.json', 'r') as f:
+    videoID = json.load(f)
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
 with open('../database/total_non_target_features.json', 'r') as f:
     non_target_data = json.load(f)
-with open('../database/videoID.json', 'r') as f:
-    videoID = json.load(f)
-#with open('../database/feature_label_representation.json', 'r') as f:
-#    features_extracted = json.load(f)
+# with open('../database/feature_label_representation.json', 'r') as f:
+#     features_extracted = json.load(f)
+
+
+connection = sqlite3.connect('../database/Phase_2.db')
+c = connection.cursor()
 
 
 def visualise(video_file):
@@ -35,6 +47,39 @@ def euclidean(a, b):
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
         return distance_res ** 0.5
+
+def BOF(query_video, feature, l):
+    get_query_video_feature = f"SELECT {feature} FROM data WHERE Video_Name = '{query_video}';"
+    c.execute(get_query_video_feature)
+    rows = c.fetchall()
+
+    cleaned_str = rows[0][0].strip("[]")
+    query_feature = list(map(int, cleaned_str.split()))
+    query_feature = np.array(query_feature).reshape(1, -1)
+
+    get_all_video_feature = f"SELECT Video_Name, {feature} FROM data WHERE videoID % 2 = 0 AND Action_Label IS NOT NULL;"
+    c.execute(get_all_video_feature)
+    rows = c.fetchall()
+
+    all_feature = []
+    for row in rows:
+        all_feature.append(list(map(int, row[1].strip("[]").split())))
+
+    distances = cdist(query_feature, all_feature, metric='euclidean').flatten()
+
+    indices = np.argsort(distances)[:l]
+
+    print(f"\n {feature} - Closest Videos to, {query_video}")
+    t = PrettyTable(["Rank", "Video Name", "Distance"])
+    
+    rank = 1
+    result_names = []
+    for idx in indices:
+        t.add_row([rank, rows[idx][0], distances[idx]])
+        result_names.append(rows[idx][0])
+        rank += 1
+    print(t)
+    return result_names
 
 def layer3_implementation(query_video, layer_number, l):
     found = False
@@ -102,11 +147,13 @@ def main():
     m = int(input("Provide the value of m: "))
     if feature_space==1 or feature_space==2 or feature_space==3:
         videos=layer3_implementation(video_name, feature_space, m)
-    elif feature_space==4 or feature_space==5:
-        print("Else part")
+    elif feature_space==4:
+        videos=BOF(video_name, 'BOF_HOG', m)
+    elif feature_space==5:
+        videos=BOF(video_name,'BOF_HOF', m)
     else:
         print("Histograms")
-    input_type = int(input("Please Select Visualisation Techniques 1- Opencv : "))
+    input_type = int(input("Please Select Visualisation Techniques 1 - Opencv, 2 - HOG/HOF Visualization : "))
     if input_type==1:
         while True:
             value = int(input("Do you want to visualise more videos: 1 - Yes, 2 - No: "))
@@ -129,4 +176,18 @@ def main():
                             found=True
                             break
                 visualise(path)
+    elif input_type == 2:
+        BOF_feature_type = int(input("Select a Feature Space: 1 - HOG, 2 - HOF: "))
+        BOF_feature_name = 'BOF_HOG' if BOF_feature_type == 1 else 'BOF_HOF'
+        while True:
+            value = int(input("Do you want to visualise more videos: 1 - Yes, 2 - No: "))
+            if value == 2:
+                print("Visualised the videos")
+                break
+            elif value == 1:
+                print(f"Please Select Videos from 1 - {m}")
+                query_video = input("Enter the Video name: ")
+
+                Visualize_HoG_HoF(BOF_feature_name, query_video)
+
 main()
