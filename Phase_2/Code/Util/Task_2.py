@@ -105,7 +105,7 @@ def get_HoG_HoF_features(target_path):
                 hog_histogram, bin_edges = np.histogram(hog_cluster_Id, bins=np.arange(41))
                 hof_histogram, bin_edges = np.histogram(hof_cluster_Id, bins=np.arange(41))
 
-            elif filtered_df.shape[0] != 0:
+            elif filtered_df.shape[0] == 0:
                     hog_histograms.append(np.zeros(480))
                     hof_histograms.append(np.zeros(480))
 

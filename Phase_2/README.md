@@ -1,9 +1,32 @@
-# CSE 515 Phase 2
+# CSE 515 Phase 2 - Group 5
 
 # Directory Structure:
 The Phase-2 directory consists of the following directories
 
-## 1.Code: 
+```plaintext
+Phase_2/
+│
+├── README.md                   # Project Overview (this file)
+│
+├── Code/                       # Source Code for Phase 2
+│   └── Util/                   # Source Code to assist Phase 2
+│
+├── database/                   # Contains the db and json files
+│
+├── dataset/                    # Contains the video data split as target and non target
+│   ├── non_target_videos/      # Contains non target videos
+│   └── target_videos/          # Contains target videos
+│
+├── dataset_stips/              # Contains the video STIPs data split as target and non target
+│   ├── non_target_videos/      # Contains non target videos STIPs
+│   └── target_videos/          # Contains target videos STIPs
+│
+├── hmdb51_org/                 # Contains all the original data videos
+│
+└── hmdb51_org_stips/           # Contains all the original videos STIPs data
+```
+
+## 1. Code:
 This directory consists of all the codes of the task, including the preprocessing and actual tasks.
 
 ### Util:
@@ -30,28 +53,78 @@ Task_1.py: The implementation code that lists 'l' most similar labels.
 
 Task2.py: Consists that code that implements all the latent features.
 
-## 2.Database:
+## 2. Database:
 This directory consists of all the json files that are stored as part of all the tasks.
 
-## 3.Dataset:
+## 3. Dataset:
 This directory consists of two more directories which are target_videos and non_target_videos.
 
-## 4.Dataset Stips:
+## 4. Dataset Stips:
+This directory contains the video STIPs files split into two directories, target_videos and non_target_videos.
 
-todo
+## 5. hmdb51_org:
 
-## 5.hmdb51_org:
+This directory contains all the original data videos of each category label.
 
-This directory consists all the original data videos of each category label.
+## 6. hmdb51_org_stips:
+This directory contains all the original videos STIPs data.
 
-## 6.hmdb51_org_stips:
+<br>
+<br>
 
-todo
+# How to Run
 
-# Execution:
+1. Download, Extract and copy the dataset to hmdb51_org and hmdb51_org_stips
 
-Inorder to execute the the files, we have chosen to use terminal execution. The command for execution is `python3 <filename>`.
+[Download Link](https://serre-lab.clps.brown.edu/resource/hmdb-a-large-human-motion-database/#Downloads)
 
+2. Install the required dependencies:
+> `pip install -r requirements.txt`
 
-# Libraries:
-`OpenCV`, `Pytorch`, `SQLite`.
+3. Run Task 0a only on first time setup:
+> `python Code/Task_0a.py`
+
+4. Run the Source Code from `Code` directory in order:
+> `cd Code`
+>
+> `python Task_0b.py`
+>
+> `python Task_1.py`
+>
+> `python Task_2.py`
+>
+> `python Task_3.py`
+>
+> `python Task_4.py`
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+
+3. Run the main script:
+> `python Code/main.py`
+
+<br>
+
+# Using the SQLite Database
+
+1. Connect to the database from the CLI
+> `sqlite3 database/Phase_2.db`
+
+2. List the tables in the db
+> `.tables`
+
+3. View the table Schema
+> `.schema data`
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+
+>`PRAGMA table_info(data)`
+
+4. Use SQL to query db
+> `select * from data limit 5;`
+
+5. Other Resources
+
+- [SQLite Browser](http://sqlitebrowser.org/)
+- [SQLite Viewer](https://inloop.github.io/sqlite-viewer/)
+- [spatialite-gui](https://www.gaia-gis.it/fossil/spatialite_gui/index)
+

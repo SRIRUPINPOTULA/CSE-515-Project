@@ -2,24 +2,8 @@ import json
 import numpy as np
 from sklearn.cluster import KMeans
 
-with open('../database/total_target_features.json', 'r') as f:
-    target_data = json.load(f)
-with open('../database/category_map.json', 'r') as f:
-    category_map = json.load(f)
-with open('../database/videoID.json', 'r') as f:
-    videoID = json.load(f)
-
-def pca():
-    return
-
-def svd():
-    return
-
-def lda():
-    return
-
 #Define the kmeans clustering for the latent sematics "s" 
-def kmeans_clustering(s, feature_model):
+def kmeans_clustering(s, feature_model, target_data, videoID):
     total_features=[]
     #Extract the video name from the json
     for video in target_data:
@@ -84,20 +68,6 @@ def kmeans_clustering(s, feature_model):
         total_videos.sort(key=lambda x: x["weight"], reverse=True)
         weight_mapping["video_clusters"][f"Cluster{i+1}"]=total_videos
     
+    # TODO: move to Output folder
     with open(f'../database/video_ID-weight_files_{feature_model}.json', 'w') as f:
         json.dump(weight_mapping, f, indent=4)
-
-def main():
-    feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram : "))
-    s = int(input("Provide the value of s: "))
-    technique = int(input("Provide the dimensionality Reduction Technique: 1 - PCA, 2 - SVD, 3 - LDA, 4 - KMeans"))
-    if technique==1:
-        pca()
-    elif technique==2:
-        svd()
-    elif technique==3:
-        lda()
-    elif technique==4:
-        kmeans_clustering(s, feature_space)
-    
-main()
