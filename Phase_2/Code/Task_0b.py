@@ -1,19 +1,15 @@
 import json
 import cv2
-import numpy as np
-import sqlite3
-from sklearn.metrics.pairwise import euclidean_distances
-
 #Phase-2/dataset/non_target_videos/_Art_of_the_Drink__Flaming_Zombie_pour_u_nm_np2_fr_med_1.avi
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
 with open('../database/total_non_target_features.json', 'r') as f:
     non_target_data = json.load(f)
-with open('../database/feature_label_representation.json', 'r') as f:
-    features_extracted = json.load(f)
+with open('../database/videoID.json', 'r') as f:
+    videoID = json.load(f)
+#with open('../database/feature_label_representation.json', 'r') as f:
+#    features_extracted = json.load(f)
 
-connection = sqlite3.connect('../database/Phase_2.db')
-c = connection.cursor()
 
 def visualise(video_file):
     print("The video path", video_file)
@@ -26,7 +22,7 @@ def visualise(video_file):
         if not ret:
             break
         # Visualizing the video frame using OpenCV
-        cv2.imshow("The captured frame is: ", video_file)
+        cv2.imshow(f"The captured frame is: {video_file}", frame)
         if cv2.waitKey(30) & 0xFF == ord('q'):
             break
     
@@ -39,37 +35,6 @@ def euclidean(a, b):
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
         return distance_res ** 0.5
-
-def find_closest_clusters(x, y):
-    distances = euclidean_distances(x, y)
-    return np.argmin(distances, axis=1)
-
-def HoG(query_video, l):
-    get_HoG_value = f"""SELECT BOF_HOG FROM data WHERE Video_Name = {query_video};"""
-    c.execute(get_HoG_value)
-    rows = c.fetchall()
-
-    cleaned_str = rows[0][0].strip("[]")
-    query_video_features = list(map(int, cleaned_str.split()))
-    data = np.array(query_video_features).reshape(12, 40)
-    
-    
-
-    
-    return
-
-def HoF(query_video, l):
-    get_HoF_value = f"""SELECT BOF_HOF FROM data WHERE Video_Name = {query_video};"""
-    c.execute(get_HoF_value)
-    rows = c.fetchall()
-
-    cleaned_str = rows[0][0].strip("[]")
-    query_video_features = list(map(int, cleaned_str.split()))
-    data = np.array(query_video_features).reshape(12, 40)
-
-    
-    return
-
 
 def layer3_implementation(query_video, layer_number, l):
     found = False
@@ -100,17 +65,18 @@ def layer3_implementation(query_video, layer_number, l):
     for i in target_data:
         for key, value in i.items():
             video_name=key
-            curr_feature = value[layer_number-1]
-            distance = euclidean(layer, curr_feature)
-            res.append((distance, key))
-    for i in non_target_data:
-        for key, value in i.items():
-            video_name=key
-            curr_feature = value[layer_number-1]
-            distance = euclidean(layer, curr_feature)
-            res.append((distance, key))
+            if videoID[video_name]%2==0:
+                curr_feature = value[layer_number-1]
+                distance = euclidean(layer, curr_feature)
+                res.append((distance, key))
+    #for i in non_target_data:
+    #    for key, value in i.items():
+    #        video_name=key
+    #        curr_feature = value[layer_number-1]
+    #        distance = euclidean(layer, curr_feature)
+    #        res.append((distance, key))
     res.sort(key=lambda i:i[0])
-    print("******The \"m\" most similar videos are: ********")
+    print(f"******The \"{l}\" most similar videos are: ********")
     video_name = []
     #for i in range(0,20):
     for i in range(0, l):
@@ -136,10 +102,8 @@ def main():
     m = int(input("Provide the value of m: "))
     if feature_space==1 or feature_space==2 or feature_space==3:
         videos=layer3_implementation(video_name, feature_space, m)
-    elif feature_space==4:
-        videos=HoG(video_name, m)
-    elif feature_space==5:
-        videos=HoF(video_name, m)
+    elif feature_space==4 or feature_space==5:
+        print("Else part")
     else:
         print("Histograms")
     input_type = int(input("Please Select Visualisation Techniques 1- Opencv : "))
