@@ -6,19 +6,27 @@ The Phase-2 directory consists of the following directories
 ## 1.Code: 
 This directory consists of all the codes of the task, including the preprocessing and actual tasks.
 
-Task-0:
+### Util:
+
+This Directory Consists of the corrected phase-1 code. 
+
+Task_1.py: This is the phase-1 task1 code that has functions to extract the features from layer3, layer4, avgpool.
+
+Task_2.py: This is the phase-1 task2 code that has functions to extract the HoG and HoF features.
+
+### Task-0:
 
 Task_0a.py: Consists code to map the videoID, and extracts all the features.
 
 Task_0b.py: Implements a program to visualize the m most similar videos.
 
-Task-1:
+### Task-1:
 
 Task_1_preprocess.py: The values are stored in JSON for each category label this being a preprocessing step.
 
 Task_1.py: The implementation code that lists 'l' most similar labels.
 
-Task-2:
+### Task-2:
 
 Task2.py: Consists that code that implements all the latent features.
 
@@ -39,8 +47,5 @@ This directory consists all the original data videos.
 
 todo
 
-
-
-
-
+# Execution:
 
