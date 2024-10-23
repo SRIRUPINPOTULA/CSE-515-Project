@@ -58,6 +58,7 @@ Task2.py: Consists that code that implements all the latent features.
 
 ### Task-4:
 
+
 ## 2. Database:
 This directory consists of all the json files that are stored as part of all the tasks.
 
@@ -94,7 +95,7 @@ This directory contains all the original videos STIPs data.
 >
 > `python Task_0b.py`
 >
-> 'python Task_1_preprocess.py'
+> `python Task_1_preprocess.py`
 > 
 > `python Task_1.py`
 >
