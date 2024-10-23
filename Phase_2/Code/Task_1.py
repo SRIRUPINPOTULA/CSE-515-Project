@@ -56,15 +56,15 @@ def cosine_similarity(a, b):
     list_a=0
     list_b=0
     #Compute the Magnitude of list a
-    for i in range(0,512):
+    for i in range(0,len(a)):
         list_a += a[i]**2
     list_a=list_a ** 0.5
     #Compute the Magnitude of list b
-    for i in range(0,512):
+    for i in range(0,len(a)):
         list_b += b[i]**2
     list_b = list_b ** 0.5
     #Compute the dot product of list a to list b elements
-    for i in range(0,512):
+    for i in range(0,len(a)):
         dot_sum += a[i] * b[i]
     final_ans= dot_sum/(list_a * list_b)
     return final_ans
