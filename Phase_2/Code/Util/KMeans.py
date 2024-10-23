@@ -80,11 +80,6 @@ def kmeans_clustering(s, feature_model):
     kmeans.fit(filtered_features)
     #Compute the Cluster Centres
     cluster_centre = kmeans.cluster_centers_
-    
-    video_ids = total_features[:, 0].astype(int) 
-    features = total_features[:, 1:]
-    
-    #cluster_distance = np.linalg.norm(features[:, np.newaxis] - cluster_centre, axis=2)
     cluster_centre_list = cluster_centre.tolist()
     video_weight={}
     for video in target_data:
