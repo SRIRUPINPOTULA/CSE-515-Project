@@ -50,7 +50,7 @@ def euclidean(a, b):
     distance_res=0
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
-        return distance_res ** 0.5
+    return distance_res ** 0.5
 # Function to find the m most similar video
 def BOF(query_video, feature, l):
     #Gather the video features for the query video from the database
