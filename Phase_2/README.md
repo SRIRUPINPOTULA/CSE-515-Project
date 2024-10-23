@@ -105,7 +105,7 @@ This directory contains all the original videos STIPs data.
 >
 > `python Task_4.py`
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+<br>
 
 # Using the SQLite Database
 

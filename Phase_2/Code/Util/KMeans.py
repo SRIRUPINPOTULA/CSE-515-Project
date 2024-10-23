@@ -54,7 +54,7 @@ def kmeans_clustering(s, feature_model, target_data, videoID):
         "centroids": cluster_centre_list,
         "video_clusters": {}
     }
-    #Check for mapping of the code
+    # Check for mapping of the code
     for i, centre in enumerate(cluster_centre):
         cluster_distances = cluster_distance[:, i]
         video_pairs = sorted(
