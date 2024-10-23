@@ -53,6 +53,11 @@ Task_1.py: The implementation code that lists 'l' most similar labels.
 
 Task2.py: Consists that code that implements all the latent features.
 
+### Task-3: 
+
+
+### Task-4:
+
 ## 2. Database:
 This directory consists of all the json files that are stored as part of all the tasks.
 
@@ -89,6 +94,8 @@ This directory contains all the original videos STIPs data.
 >
 > `python Task_0b.py`
 >
+> 'python Task_1_preprocess.py'
+> 
 > `python Task_1.py`
 >
 > `python Task_2.py`
@@ -98,11 +105,6 @@ This directory contains all the original videos STIPs data.
 > `python Task_4.py`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
-
-3. Run the main script:
-> `python Code/main.py`
-
-<br>
 
 # Using the SQLite Database
 
