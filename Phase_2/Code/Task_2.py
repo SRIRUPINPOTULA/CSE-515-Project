@@ -23,10 +23,14 @@ Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: 
 connection = sqlite3.connect('../database/Phase_2.db')
 c = connection.cursor()
 
-if feature_space != 6:
-    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label NOT NULL LIMIT 5;"
-else:
+if feature_space in [1, 2, 3, 4, 5]:
+    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label NOT NULL LIMIT 2;"
+elif feature_space == 6:
     retrieval_query = ""
+else:
+    print("Invalid Feature Space selected.")
+    connection.close()
+    exit()
 
 c.execute(retrieval_query)
 rows = c.fetchall()
@@ -34,10 +38,10 @@ rows = c.fetchall()
 cleaned_data = []
 if feature_space in [1, 2, 3]:
     for row in rows:
-        cleaned_data.append(list(map(float, row[1].strip("[]").split(","))))
+        cleaned_data.append(list(map(float, row[0].strip("[]").split(","))))
 elif feature_space in [4, 5]:
     for row in rows:
-        cleaned_data.append(list(map(int, row[1].strip("[]").split())))
+        cleaned_data.append(list(map(int, row[0].strip("[]").split())))
 
 data = np.array(cleaned_data)
 
@@ -48,13 +52,12 @@ elif DR_method == 2:
     SVD(data, latent_count)
 
 elif DR_method == 3:
-    print("LDA")
+    LDA(data, latent_count)
 
 elif DR_method == 4:
     kmeans_clustering(latent_count, feature_space, target_data, videoID)
 
 else:
     print("Invalid Dimensionality Reduction technique selected.")
-
 
 connection.close()

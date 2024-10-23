@@ -12,6 +12,7 @@ def PCA(data, latent_count):
     sorted_eigenvalues = eigenvalues[sorted_indices]
     sorted_eigenvectors = eigenvectors[:, sorted_indices]
 
+    eigenvalues_subset = sorted_eigenvalues[:latent_count]
     eigenvectors_subset = sorted_eigenvectors[:, :latent_count]
 
     # Left factor matrix: projected data onto principal components
@@ -19,7 +20,10 @@ def PCA(data, latent_count):
     # Right factor matrix: Principal components (eigenvectors)
     right_matrix = eigenvectors_subset
     
-
     pca_data = np.dot(data, eigenvectors_subset)
+
+    print(f"Top-{latent_count} latent Semantics for PCA")
+    for index, eigenvalue in enumerate(eigenvalues_subset):
+        print(f"{index} - {eigenvalue}")
     
     return left_matrix, right_matrix, sorted_eigenvalues[:latent_count]

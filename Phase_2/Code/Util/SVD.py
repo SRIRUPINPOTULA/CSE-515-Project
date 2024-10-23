@@ -15,7 +15,6 @@ def SVD(data, latent_count):
     
     V_subset = V[:, :latent_count]
 
-    # TODO: implement k somewhere
     # Step 4: Compute singular values (square roots of eigenvalues of D^T D)
     singular_values = np.sqrt(eigenvalues_V)
 
@@ -27,23 +26,24 @@ def SVD(data, latent_count):
 
     # Step 7: Sort eigenvalues and eigenvectors of U in descending order
     sorted_indices_U = np.argsort(eigenvalues_U)[::-1]
+    eigenvalues_U = eigenvalues_U[sorted_indices_U]
     U = U[:, sorted_indices_U]
+
+    U_subset = U[:, :latent_count]
 
     # Step 8: Construct the Sigma matrix
     Sigma = np.zeros_like(data, dtype=float)
-    np.fill_diagonal(Sigma, singular_values)
+    np.fill_diagonal(Sigma, singular_values[:latent_count])
+
+    print(f"Top-{latent_count} latent Semantics for SVD")
+    for index, eigenvalue in enumerate(singular_values[:latent_count]):
+        print(f"{index} - {eigenvalue}")
     
-    return U, Sigma, V.T
+    # print("U_k Matrix:")
+    # print(U_subset)
+    # print("\nSigma_k Matrix:")
+    # print(Sigma)
+    # print("\nVt_k Matrix:")
+    # print(V_subset.T)
 
-
-    eigenvectors_subset = sorted_eigenvectors[:, :latent_count]
-
-    # Left factor matrix: projected data onto principal components
-    left_matrix = np.dot(data, eigenvectors_subset)
-    # Right factor matrix: Principal components (eigenvectors)
-    right_matrix = eigenvectors_subset
-    
-
-    pca_data = np.dot(data, eigenvectors_subset)
-    
-    return left_matrix, right_matrix, sorted_eigenvalues[:latent_count]
+    return U_subset, Sigma, V_subset.T
