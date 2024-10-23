@@ -18,7 +18,7 @@ connection = sqlite3.connect('../database/Phase_2.db')
 c = connection.cursor()
 
 if feature_space in [1, 2, 3, 4, 5]:
-    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label NOT NULL LIMIT 2;"
+    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label NOT NULL;"
 elif feature_space == 6:
     retrieval_query = ""
 else:
@@ -40,13 +40,13 @@ elif feature_space in [4, 5]:
 data = np.array(cleaned_data)
 
 if DR_method == 1:
-    PCA(data, latent_count)
+    PCA(data, latent_count, Feature_Space_Map[feature_space])
 
 elif DR_method == 2:
-    SVD(data, latent_count)
+    SVD(data, latent_count, Feature_Space_Map[feature_space])
 
 elif DR_method == 3:
-    LDA(data, latent_count)
+    LDA(data, latent_count, Feature_Space_Map[feature_space])
 
 elif DR_method == 4:
     kmeans_clustering(latent_count, feature_space)

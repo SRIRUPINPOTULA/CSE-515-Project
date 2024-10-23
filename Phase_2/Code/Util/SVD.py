@@ -1,8 +1,9 @@
 import csv
+import json
 import numpy as np
 
 # data = U Σ V^T
-def SVD(data, latent_count):
+def SVD(data, latent_count, feature_space):
 
     # D^T D
     DtD = np.dot(data.T, data)
@@ -40,6 +41,11 @@ def SVD(data, latent_count):
     # Data in Reduced Dimensional space
     svd_data = np.dot(np.dot(data, V_subset), Sigma)
 
+    # videoID-wieght pairs
+    svd_data_json = {}
+    for index in enumerate(svd_data):
+        svd_data_json[index*2] = svd_data[index]
+
     print(f"Top-{latent_count} latent Semantics for SVD")
     for index, eigenvalue in enumerate(singular_values[:latent_count]):
         print(f"{index} - {eigenvalue}")
@@ -59,3 +65,6 @@ def SVD(data, latent_count):
     with open('../Outputs/Task_2/SVD_data.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(svd_data)
+
+    with open(f'../Outputs/Task_2/videoID-weight_SVD_{feature_space}.json', 'w') as f:
+        json.dump(svd_data_json, f, indent=4)

@@ -15,6 +15,8 @@ with open('../database/videoID.json', 'r') as f:
 kmeans_centroids = {}
 kmeans_videoID_maps = {}
 
+Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
+
 def euclidean(a, b):
     distance_res=0
     for i in range(0, len(a)):
@@ -111,9 +113,9 @@ def kmeans_clustering(s, feature_model):
             video_weight[videoID[video_name]]=minimum_val
     sorted_video_weight = dict(sorted(video_weight.items(), key=lambda x:x[1], reverse=True))
     res=[sorted_video_weight]
-    with open('../Outputs/cluster_centres.json', 'w') as f:
-        json.dump(cluster_centre_list, f, indent=4)    
-    with open(f'../Outputs/video_ID-weight_files_{feature_model}.json', 'w') as f:
+    with open('../Outputs/Task_2/KMeans_latent.json', 'w') as f:
+        json.dump(cluster_centre_list, f, indent=4)
+    with open(f'../Outputs/Task_2/videoID-weight_KMeans_{Feature_Space_Map[feature_model]}.json', 'w') as f:
         json.dump(res, f, indent=4)
     print(f"******The \"{s}\" latent semantics are: ********")
     

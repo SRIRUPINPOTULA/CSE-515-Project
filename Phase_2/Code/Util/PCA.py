@@ -1,7 +1,8 @@
 import csv
+import json
 import numpy as np
 
-def PCA(data, latent_count):
+def PCA(data, latent_count, feature_space):
 
     # We use covariance matrix for PCA
     cov_matrix = np.cov(data, rowvar=False)
@@ -28,6 +29,11 @@ def PCA(data, latent_count):
     # Data in Reduced Dimensional space
     pca_data = np.dot(data, eigenvectors_subset)
 
+    # videoID-wieght pairs
+    pca_data_json = {}
+    for index in enumerate(pca_data):
+        pca_data_json[index*2] = pca_data[index]
+
     print(f"Top-{latent_count} latent Semantics for PCA")
     for index, eigenvalue in enumerate(eigenvalues_subset):
         print(f"{index} - {eigenvalue}")
@@ -39,7 +45,6 @@ def PCA(data, latent_count):
     with open('../Outputs/Task_2/PCA_core_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(core_matrix)
-
-    with open('../Outputs/Task_2/PCA_data.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerows(pca_data)
+    
+    with open(f'../Outputs/Task_2/videoID-weight_PCA_{feature_space}.json', 'w') as f:
+        json.dump(pca_data_json, f, indent=4)

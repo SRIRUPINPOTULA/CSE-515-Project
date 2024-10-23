@@ -127,7 +127,7 @@ def BOF(query_video, feature, l):
     return result_names
 
 def kmeans_similarity(query_video, layer_number, l):
-    with open('../Outputs/cluster_centres.json', 'r') as f:
+    with open('../Outputs/Task_2/KMeans_latent.json', 'r') as f:
         cluster_centres = json.load(f)
     layer=[]
     for video in target_data:
