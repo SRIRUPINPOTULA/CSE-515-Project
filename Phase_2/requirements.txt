@@ -1,3 +1,14 @@
-
-
-pip install gensim nltk
+# Basic Python libraries
+python
+opencv-python
+torch
+torchvision
+gensim
+nltk
+scikit-learn
+matplotlib
+numpy
+prettytable
+sqlite 
+pandas
+scipy
