@@ -135,19 +135,3 @@ def kmeans_clustering(s, feature_model):
     for i in range(len(cluster_centre_list)):
         print(f"The cluster centre - {i+1} is: ", cluster_centre_list[i]) 
     return
-            
-
-def main():
-    feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram : "))
-    s = int(input("Provide the value of s: "))
-    technique = int(input("Provide the dimensionality Reduction Technique: 1 - PCA, 2 - SVD, 3 - LDA, 4 - KMeans: "))
-    if technique==1:
-        pca()
-    elif technique==2:
-        svd()
-    elif technique==3:
-        lda()
-    elif technique==4:
-        kmeans_clustering(s, feature_space)
-    
-main()
