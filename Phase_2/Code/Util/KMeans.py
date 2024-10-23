@@ -21,15 +21,6 @@ def euclidean(a, b):
         distance_res += (a[i] - b[i])**2
     return distance_res ** 0.5
 
-def pca():
-    return
-
-def svd():
-    return
-
-def lda():
-    return
-
 #Define the kmeans clustering for the latent sematics "s" 
 def kmeans_clustering(s, feature_model):
     total_features=[]
@@ -120,13 +111,13 @@ def kmeans_clustering(s, feature_model):
             video_weight[videoID[video_name]]=minimum_val
     sorted_video_weight = dict(sorted(video_weight.items(), key=lambda x:x[1], reverse=True))
     res=[sorted_video_weight]
-    with open('../Output/cluster_centres.json', 'w') as f:
+    with open('../Outputs/cluster_centres.json', 'w') as f:
         json.dump(cluster_centre_list, f, indent=4)    
-    with open(f'../Output/video_ID-weight_files_{feature_model}.json', 'w') as f:
+    with open(f'../Outputs/video_ID-weight_files_{feature_model}.json', 'w') as f:
         json.dump(res, f, indent=4)
     print(f"******The \"{s}\" latent semantics are: ********")
     
     #Print the cluster centres
     for i in range(len(cluster_centre_list)):
-        print(f"The cluster centre - {i+1} is: ", cluster_centre_list[i]) 
+        print(f"The cluster centre - {i+1} is: ", cluster_centre_list[i])
     return

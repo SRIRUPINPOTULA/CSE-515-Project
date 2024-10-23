@@ -1,4 +1,3 @@
-import json
 import numpy as np
 
 import sqlite3
@@ -7,11 +6,6 @@ from Util.PCA import PCA
 from Util.SVD import SVD
 from Util.LDA import LDA
 from Util.KMeans import kmeans_clustering
-
-with open('../database/total_target_features.json', 'r') as f:
-    target_data = json.load(f)
-with open('../database/videoID.json', 'r') as f:
-    videoID = json.load(f)
 
 feature_space = int(input("Select a Feature Space: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram : "))
 latent_count = int(input("Select a value to pick top-s results: "))
@@ -55,7 +49,7 @@ elif DR_method == 3:
     LDA(data, latent_count)
 
 elif DR_method == 4:
-    kmeans_clustering(latent_count, feature_space, target_data, videoID)
+    kmeans_clustering(latent_count, feature_space)
 
 else:
     print("Invalid Dimensionality Reduction technique selected.")

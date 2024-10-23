@@ -1,4 +1,5 @@
 # Import necessary libraries
+import json
 import numpy as np
 import gensim
 import gensim.corpora as corpora
@@ -34,3 +35,6 @@ def LDA(data, k):
     print(f"Top-{k} latent Semantics for LDA")
     for idx, topic in lda_model.print_topics(-1):
         print(f"Topic {idx}: {topic}")
+    
+    with open("../Outputs/Task_2/LDA_latent.json", "w") as json_file:
+        json.dump(lda_model.print_topics(-1), json_file, indent=4)
