@@ -57,7 +57,7 @@ create_data_table = """CREATE TABLE IF NOT EXISTS data (
 c.execute(create_data_table)
 # c.execute(create_color_hist_table)
 
-
+#Mapping the video id to all the target and non target videos
 def create_video_id():
     counter = 0
     target_path = '../dataset/target_videos'
@@ -73,7 +73,7 @@ def create_video_id():
     with open('../database/videoID.json', 'w') as f:
         json.dump(videoID, f, indent=4)
 
-
+# Video Category Map for all the even numbered target videos
 def video_category_map():
     dataset = '../hmdb51_org'
     for action in os.listdir(dataset):
@@ -89,7 +89,7 @@ def video_category_map():
     with open('../database/category_map.json', 'w') as f:
         json.dump(actionmap, f, indent=4)
 
-
+#Extracting Features for all the target videos
 def target_videos_features():
     target_path = '../dataset/target_videos'
     target_feature = []
@@ -98,13 +98,17 @@ def target_videos_features():
 
         video_features_map = {}
         video_features = []
-
+        # Extract the feature as a layer3
         layer_3 = layer3_feature(video_path)
         video_features.append(layer_3)
+        # Extract the feature as a layer4
         layer_4 = layer4_feature(video_path)
         video_features.append(layer_4)
+        # Extract the feature as a avgpool
         avgPool = avgpool_feature(video_path)
+        #Append to a list
         video_features.append(avgPool)
+        # Gather features for all the HoG, HoF ad append to a list
         bof_HOG, bof_HOF = get_HoG_HoF_features('../dataset_stips/target_videos/' + target_videos + '.txt')
         video_features.append(bof_HOG.tolist())
         video_features.append(bof_HOF.tolist())
@@ -112,17 +116,17 @@ def target_videos_features():
 
         video_features_map[target_videos] = video_features
         target_feature.append(video_features_map)
-
+        #Insert into database all the features
         if videoID[target_videos]%2 == 0:
             video_insert = f"INSERT INTO data VALUES({videoID[target_videos]}, '{target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', '{actionmap[target_videos]}');"
         else:
             video_insert = f"INSERT INTO data VALUES({videoID[target_videos]}, '{target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', NULL);"
         c.execute(video_insert)
-    
+    # Dump all the target features
     with open('../database/total_target_features.json', 'w') as f:
         json.dump(target_feature, f, indent=4)
 
-
+# Extract features for all the non target videos
 def non_target_videos_features():
     non_target_path = '../dataset/non_target_videos'
     non_target_feature = []
@@ -131,13 +135,16 @@ def non_target_videos_features():
 
         video_features_map = {}
         video_features = []
-
+        # Extract the feature as a layer3
         layer_3 = layer3_feature(video_path)
         video_features.append(layer_3)
+        # Extract the feature as a layer4
         layer_4 = layer4_feature(video_path)
         video_features.append(layer_4)
+        # Extract the feature as a avgpool
         avgPool = avgpool_feature(video_path)
         video_features.append(avgPool)
+        # Extract the feature as a HoG and HoF
         bof_HOG, bof_HOF = get_HoG_HoF_features('../dataset_stips/non_target_videos/' + non_target_videos + '.txt')
         video_features.append(bof_HOG.tolist())
         video_features.append(bof_HOF.tolist())
@@ -145,10 +152,10 @@ def non_target_videos_features():
 
         video_features_map[non_target_videos] = video_features
         non_target_feature.append(video_features_map)
-
+        # Insert into Database
         video_insert = f"INSERT INTO data VALUES({videoID[non_target_videos]}, '{non_target_videos}', '{layer_3}', '{layer_4}', '{avgPool}', '{bof_HOG}', '{bof_HOF}', NULL);"
         c.execute(video_insert)
-
+    # Dumping all the videos in the non target video features
     with open('../database/total_non_target_features.json', 'w') as f:
         json.dump(non_target_feature, f, indent=4)
 
@@ -156,19 +163,19 @@ def non_target_videos_features():
 # Move all videos from 'hmdb51_org' to 'dataset/target_videos' and 'dataset/non_target_videos'
 def move_videos():
     path = '../hmdb51_org'
-
+    #Check if already the directory exists if so, delete it to create directory for target videos
     target_path = os.listdir('../dataset/target_videos')
     for file in target_path:
         full_path = os.path.join('../dataset/target_videos', file)
         if os.path.isfile(full_path):
             os.remove(full_path)
-
+    #Check if already the directory exists if so, delete it to create directory for non target videos
     non_target_path = os.listdir('../dataset/non_target_videos')
     for file in non_target_path:
         full_path = os.path.join('../dataset/non_target_videos', file)
         if os.path.isfile(full_path):
             os.remove(full_path)
-
+    #Transfer all the videos to their respective directories
     for video_dir in os.listdir(path):
         if video_dir in target_videos:
             video_path = f'{path}/{video_dir}'
@@ -189,19 +196,19 @@ def move_videos():
 # Move all video STIPs from 'hmdb51_org_stips' to 'dataset_stips/target_videos' and 'dataset_stips/non_target_videos'
 def move_stips():
     path = '../hmdb51_org_stips'
-
+    # Check if already the directory exists if so, delete it to create directory for target videos
     target_path = os.listdir('../dataset_stips/target_videos')
     for file in target_path:
         full_path = os.path.join('../dataset_stips/target_videos', file)
         if os.path.isfile(full_path):
             os.remove(full_path)
-
+    # Check if already the directory exists if so, delete it to create directory for non target videos
     non_target_path = os.listdir('../dataset_stips/non_target_videos')
     for file in non_target_path:
         full_path = os.path.join('../dataset_stips/non_target_videos', file)
         if os.path.isfile(full_path):
             os.remove(full_path)
-
+    # Transfer all the videos to their respective directories
     for video_dir in os.listdir(path):
         if video_dir in target_videos:
             video_path = f'{path}/{video_dir}'
@@ -218,7 +225,7 @@ def move_stips():
                 file_name = os.path.join(video_path, all_videos)
                 shutil.copy(file_name, destination_dir)
 
-
+#Calling the functions
 move_videos()
 move_stips()
 
