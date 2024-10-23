@@ -95,7 +95,11 @@ def kmeans_similarity(query_video, layer_number, l):
                 rows = c.fetchall()
                 cleaned_str = rows[0][0].strip("[]")
                 curr_feature = list(map(int, cleaned_str.split()))
-            distance = euclidean(layer, curr_feature)
+            curr_feature_values=[]
+            for i in range(0, len(cluster_centres)):
+                b=euclidean(cluster_centres[i], curr_feature)
+                curr_feature_values.append(b)
+            distance = euclidean(query_video_features, curr_feature_values)
             res.append((distance, key))
     res.sort(key=lambda i:i[0])
     print(f"******The \"{l}\" most similar videos are: ********")
