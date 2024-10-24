@@ -252,11 +252,11 @@ def kmeans(label, feature_space,m):
     return
 
 def get_Label_features(label, feature_space, latent_features, isLDA):
-
+    #Gather the features for a gievn feature space
     label_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE Action_Label='{label}';"
     c.execute(label_query)
     rows = c.fetchall()
-
+    #Clean the extracted values and make a list of features
     cleaned_data = []
     if feature_space in [1, 2, 3]:
         for row in rows:
@@ -268,7 +268,8 @@ def get_Label_features(label, feature_space, latent_features, isLDA):
     max_len = max(len(lst) for lst in cleaned_data)
     padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
     data = np.array(padded_data)
-
+    
+    #Take a mean on the data that is extracted
     averaged_array = np.mean(data, axis=0)
     reshaped_array = averaged_array.reshape(1, max_len)
 
@@ -284,6 +285,7 @@ def get_Label_features(label, feature_space, latent_features, isLDA):
         dim_reduced_array = np.dot(reshaped_array, latent_features)
         return dim_reduced_array
 
+# Function to compare distance for all the label data
 def compare_distances(label_data, feature_space, latent_features, m, isLDA):
 
     all_video_query = f"SELECT Video_Name, {Feature_Space_Map[feature_space]} FROM data WHERE videoID <= 2872;"
@@ -351,15 +353,16 @@ def infer_new_document_lda(lda_model, dictionary, new_document):
 
     return feature_matrix
 
-
+#Define the main function
 def main():
 
+    #Get the user inputs as video label, latent semantic and feature space
     label = input("Please provide the label: ")
     latent_Semantic = int(input("Please Provide the Latent Semantics 1 - PCA, 2 - SVD, 3 - LDA, 4 - KMeans: "))
     m = int(input("Please provide a value for m: "))
     feature_space = int(input("Select the Feature Space used in Task 2: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4 - HOG, 5 - HOF, 6 - Color Histogram : "))
 
-    # Gather the feature space
+    # Call the appropriate latent semantic depending on the user input
     if latent_Semantic == 1:
         latent_features = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
         label_data = get_Label_features(label, feature_space, latent_features, False)
