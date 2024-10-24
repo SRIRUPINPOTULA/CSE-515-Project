@@ -1,9 +1,14 @@
 #Import the necessary libraries 
 import json
 import cv2
+
 import sqlite3
+
 import numpy as np
 from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
+
+from prettytable import PrettyTable
 
 #Establish connection to the database
 connection = sqlite3.connect('../database/Phase_2.db')
@@ -22,7 +27,7 @@ with open('../database/action_centres.json', 'r') as f:
     clusters = json.load(f)
 
 # Load the features for all the action centers
-with open('../Output/cluster_centres.json', 'r') as f:
+with open('../Outputs/Task_2/KMeans_latent.json', 'r') as f:
     cluster_centre = json.load(f)
 
 target_labels = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow',
@@ -38,12 +43,6 @@ with open('../database/category_map.json', 'r') as f:
 
 with open('../Output/cluster_centres.json', 'r') as f:
     cluster_centre = json.load(f)
-    
-#List for the tatget videos
-target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
-                'cartwheel', 'hit', 'shoot_gun', 'hug', 'sit', 'catch', 
-                'jump', 'situp', 'chew', 'kick', 'smile', 'clap', 'kick_ball', 'smoke',
-                'climb', 'somersault', 'climb_stairs', 'laugh', 'stand']
 
 #Maps to store the feature values
 kmeans_map = {}
@@ -60,15 +59,6 @@ def manhattan(a, b):
     for i in range(0,len(a)):
         res = res + abs(a[i]-b[i])
     return res
-
-def pca():
-    return
-
-def svd():
-    return 
-
-def lda():
-    return
 
 #Function to calculate the mean
 def feature_calculator(layer):
@@ -199,7 +189,7 @@ def kmeans_preprocess_func(action, feature_space):
 
 #Function that lists m similar videos
 def kmeans(label, feature_space,m):
-    for video in target_videos:
+    for video in target_labels:
         kmeans_preprocess_func(video, feature_space)
     with open('../database/category_map_kmeans.json', 'w') as f:
         json.dump(kmeans_map,f)
@@ -226,7 +216,7 @@ def kmeans(label, feature_space,m):
                 a=[]
                 #Calculate the Distance from the cluster centers
                 for i in range(0, len(cluster_centre)):
-                    dist = manhattan(layer_value, cluster_centre[i])
+                    dist = euclidean(layer_value, cluster_centre[i])
                     layer_value_1.append(dist)
             #Extract the features for HoG
             elif feature_space==4:
@@ -237,7 +227,7 @@ def kmeans(label, feature_space,m):
                 cleaned_str = rows[0][0].strip("[]")
                 layer_value = list(map(int, cleaned_str.split()))
                 for i in range(0, len(cluster_centre)):
-                    dist = manhattan(layer_value, cluster_centre[i])
+                    dist = euclidean(layer_value, cluster_centre[i])
                     layer_value_1.append(dist)
             #Extract the features for HoF
             elif feature_space==5:
@@ -250,10 +240,10 @@ def kmeans(label, feature_space,m):
                 layer_value_1=[]
                 #Calculate the Distance from the cluster centers
                 for i in range(0, len(cluster_centre)):
-                    dist = manhattan(layer_value, cluster_centre[i])
+                    dist = euclidean(layer_value, cluster_centre[i])
                     layer_value_1.append(dist)
             #Calculate the distance between query video and current video
-            distance = manhattan(query_feature, layer_value_1)
+            distance = euclidean(query_feature, layer_value_1)
             res.append((distance, key))
     #Sort based on distance
     res.sort(key=lambda i:i[0])
@@ -265,35 +255,67 @@ def kmeans(label, feature_space,m):
         video_name.append(res[i][1])
     return
 
-def get_Label_features(feature_space, latent_features):
-    label_features = {}
+def get_Label_features(label, feature_space, latent_features):
 
-    for label in target_labels:
-        label_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE Action_Label='{label}';"
-        c.execute(label_query)
-        rows = c.fetchall()
+    label_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE Action_Label='{label}';"
+    c.execute(label_query)
+    rows = c.fetchall()
 
-        cleaned_data = []
-        if feature_space in [1, 2, 3]:
-            for row in rows:
-                cleaned_data.append(list(map(float, row[0].strip("[]").split(","))))
-        elif feature_space in [4, 5]:
-            for row in rows:
-                cleaned_data.append(list(map(int, row[0].strip("[]").split())))
+    cleaned_data = []
+    if feature_space in [1, 2, 3]:
+        for row in rows:
+            cleaned_data.append(list(map(float, row[0].strip("[]").split(","))))
+    elif feature_space in [4, 5]:
+        for row in rows:
+            cleaned_data.append(list(map(int, row[0].strip("[]").split())))
 
-        max_len = max(len(lst) for lst in cleaned_data)
-        padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
-        data = np.array(padded_data)
+    max_len = max(len(lst) for lst in cleaned_data)
+    padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
+    data = np.array(padded_data)
 
-        averaged_array = np.mean(data, axis=0)
-        reshaped_array = averaged_array.reshape(1, max_len)
+    averaged_array = np.mean(data, axis=0)
+    reshaped_array = averaged_array.reshape(1, max_len)
 
-        dim_reduced_array = np.dot(reshaped_array, latent_features)
+    dim_reduced_array = np.dot(reshaped_array, latent_features)
 
-        label_features[label] = dim_reduced_array
+    return dim_reduced_array
 
-    print(label_features)
-    return label_features
+def compare_distances(label_data, feature_space, latent_features, m):
+
+    all_video_query = f"SELECT Video_Name, {Feature_Space_Map[feature_space]} FROM data WHERE videoID <= 2872;"
+    c.execute(all_video_query)
+    rows = c.fetchall()
+
+    cleaned_data = []
+    if feature_space in [1, 2, 3]:
+        for row in rows:
+            cleaned_data.append(list(map(float, row[1].strip("[]").split(","))))
+    elif feature_space in [4, 5]:
+        for row in rows:
+            cleaned_data.append(list(map(int, row[1].strip("[]").split())))
+
+    max_len = max(len(lst) for lst in cleaned_data)
+    padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
+    data = np.array(padded_data)
+
+    dim_reduced_data = np.dot(data, latent_features)
+
+    # Calculate the distance for all the video features to the query video.
+    distances = cdist(label_data, dim_reduced_data, metric='euclidean').flatten()
+    
+    # Sort the items based on distances
+    indices = np.argsort(distances)[:m]
+    # Print the items
+    print(f"\n {Feature_Space_Map[feature_space]} - Closest Videos")
+    t = PrettyTable(["Rank", "Video Name", "Distance"])
+    # Append the results to a list for visualisation
+    rank = 1
+    for idx in indices:
+        t.add_row([rank, rows[idx][0], distances[idx]])
+        rank += 1
+    print(t)
+
+    return dim_reduced_data
 
 
 def main():
@@ -306,12 +328,14 @@ def main():
     # Gather the feature space
     if latent_Semantic == 1:
         latent_features = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
-        label_data = get_Label_features(feature_space, latent_features)
-        pca = pca()
+        label_data = get_Label_features(label, feature_space, latent_features)
+        compare_distances(label_data, feature_space, latent_features, m)
     elif latent_Semantic == 2:
-        svd = svd()
+        latent_features = np.load('../Outputs/Task_2/SVD_right_matrix.npy')
+        label_data = get_Label_features(label, feature_space, latent_features)
+        compare_distances(label_data, feature_space, latent_features, m)
     elif latent_Semantic == 3:
-        lda = lda()
+        print('LDA')
     elif latent_Semantic == 4:
         kmeans(label, feature_space,m)
     else:
