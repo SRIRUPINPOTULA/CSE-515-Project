@@ -61,13 +61,23 @@ Task_1.py: The implementation code that lists 'l' most similar labels.
 
 ### Task-2:
 
-Task2.py: Consists that code that implements all the latent features.
+Task_2.py: Consists that code that implements all the latent features.
 
 ### Task-3: 
 
+Task_3.py: Consists of code that implement finds the m similar videos from the latent features and feature spaces.
 
 ### Task-4:
 
+Task_4.py: Consists of code that list `m` similar videos from the latent semantics.
+
+### Task-5:
+
+Task_5.py: Incorrect implementation.
+
+### Task-6:
+
+Task_6.py: Incorrect implementation.
 
 ## 2. Database:
 This directory consists of all the json files that are stored as part of all the tasks.
