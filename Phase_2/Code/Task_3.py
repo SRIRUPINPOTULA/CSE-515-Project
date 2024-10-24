@@ -4,6 +4,8 @@
 # m, identifies and visualizes the most similar m target videos, along with
 # their scores, under the selected model or latent space.
 
+
+#Import Necessary libraries
 import os
 import json
 import cv2
@@ -20,17 +22,21 @@ import sqlite3
 #Establish connection to database
 connection = sqlite3.connect('../database/Phase_2.db')
 c = connection.cursor()
+
+#Read the features from the JSON
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
 with open('../database/total_non_target_features.json', 'r') as f:
     non_target_data = json.load(f)
 
+#Function to calculate euclidean
 def euclidean(a, b):
     distance_res=0
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
     return distance_res ** 0.5
 
+#Function that visualised using OpenCV
 def visualise(video_file):
     print("The video path", video_file)
     cap = cv2.VideoCapture(video_file)
@@ -96,6 +102,7 @@ def layer3_implementation(query_video, layer_number, l):
         video_name.append(res[i][1])
     return video_name
 
+#Function to calculate m similar videos if the feature spaces are HoG and HoF
 def BOF(query_video, feature, l):
     #Gather the video features for the query video from the database
     get_query_video_feature = f"SELECT {feature} FROM data WHERE Video_Name = '{query_video}';"
@@ -130,16 +137,20 @@ def BOF(query_video, feature, l):
     print(t)
     return result_names
 
+# Calculate Similar Videos using Kmeans
 def kmeans_similarity(query_video, layer_number, l):
+    #Read the cluster centres from the json
     with open('../Outputs/Task_2/KMeans_latent.json', 'r') as f:
         cluster_centres = json.load(f)
     layer=[]
     found = False
+    #Find the feature of query video
     for video in target_data:
         if query_video in video:
             layer.extend(video[query_video])
             found=True
             break
+    #If query video is non target the feature is gathered here
     if found == False:
         for video in non_target_data:
             if query_video in video:
@@ -152,6 +163,7 @@ def kmeans_similarity(query_video, layer_number, l):
         layer = layer[1]
     elif layer_number==3:
         layer=layer[2]
+    #Gather the features for HoG and HoF
     elif layer_number==4:
         get_query_video_feature = f"SELECT BOF_HOG FROM data WHERE Video_Name = '{query_video}';"
         c.execute(get_query_video_feature)
@@ -165,11 +177,14 @@ def kmeans_similarity(query_video, layer_number, l):
         cleaned_str = rows[0][0].strip("[]")
         layer = list(map(int, cleaned_str.split()))
     query_video_features=[]
+    #For the query video features find the distance from the centre to the query video
     for i in range(0, len(cluster_centres)):
         a=euclidean(layer, cluster_centres[i])
         query_video_features.append(a)
     res = []
+    #Loop over all the target videos
     for i in target_data:
+        #Gather the feature for the gievn video
         for key, value in i.items():
             video_name=key
             if layer_number==1 or layer_number==2 or layer_number==3:
@@ -187,12 +202,15 @@ def kmeans_similarity(query_video, layer_number, l):
                 cleaned_str = rows[0][0].strip("[]")
                 curr_feature = list(map(int, cleaned_str.split()))
             curr_feature_values=[]
+            #For the gathered video feature capture the distance from the centres
             for i in range(0, len(cluster_centres)):
                 b=euclidean(cluster_centres[i], curr_feature)
                 curr_feature_values.append(b)
+            #calculate the distance from the query video to the curr_feature values and append it to list
             distance = euclidean(query_video_features, curr_feature_values)
             res.append((distance, key))
     res.sort(key=lambda i:i[0])
+    # Print the 'm' similar video
     print(f"******The \"{l}\" most similar videos are: ********")
     video_name = []
     for i in range(0, l):
@@ -200,6 +218,7 @@ def kmeans_similarity(query_video, layer_number, l):
         video_name.append(res[i][1])
     return video_name
 
+#Calculate lda for the given query video
 def infer_new_document_lda(lda_model, dictionary, new_document):
     
     # Preprocess the new document: tokenize
@@ -221,7 +240,7 @@ def infer_new_document_lda(lda_model, dictionary, new_document):
     feature_matrix = np.array([topic_vector(doc, lda_model.num_topics) for doc in topic_distribution])
 
     return feature_matrix
-
+#Get the closest video
 def get_closest_videos(feature_space, query_feature, all_video_names, m):
 
     # Calculate the distance for all the video features to the query video.
@@ -241,8 +260,9 @@ def get_closest_videos(feature_space, query_feature, all_video_names, m):
         rank += 1
     print(t)
     return result_names
-
+#Main function
 def main():
+    # Gather the input from user for video name, latent space, feature space
     input_type = int(input("Provide the 1 - Video File Name or 2 - VideoID: "))
     if input_type == 1:
         video_name = input("Provide the Video File Name: ")
@@ -308,7 +328,7 @@ def main():
             print(f"File not found. {check_file_name}")
             print("Latent Semantics were not prepared in Task 2")
             quit()
-
+        #load the latent semantics
         if feature_space == 7:
             latent_semantic = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
         elif feature_space == 8:
@@ -334,7 +354,7 @@ def main():
         if feature_space in [7, 8]:
             get_closest_videos(np.dot(data, latent_semantic), np.dot(query_feature, latent_semantic), all_video_names, m)
         
-        
+    #Gather the video name from the user for visualisation
     input_type = int(input("Please Select Visualisation Techniques 1 - Opencv : "))
     if input_type == 1:
         while True:
