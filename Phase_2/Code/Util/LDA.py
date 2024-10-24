@@ -61,3 +61,7 @@ def LDA(data, k, feature_space):
 
     with open(f'../Outputs/Task_2/videoID-weight_LDA_{feature_space}.json', 'w') as f:
         json.dump(lda_data_json, f, indent=4)
+
+    # Save the model and dictionary to reuse for next Task
+    lda_model.save("../Outputs/Task_2/lda_model")
+    dictionary.save("../Outputs/Task_2/dictionary")

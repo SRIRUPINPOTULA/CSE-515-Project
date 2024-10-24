@@ -7,6 +7,9 @@ import sqlite3
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
+import gensim
+import gensim.corpora as corpora
+from nltk.tokenize import word_tokenize
 
 from prettytable import PrettyTable
 
@@ -21,10 +24,6 @@ with open('../database/total_target_features.json', 'r') as f:
 # Load the category map features that are extracted for each label
 with open('../database/category_map_kmeans.json', 'r') as f:
     kmeans_preprocess = json.load(f)
-
-# Load the features for all the action centers
-with open('../database/action_centres.json', 'r') as f:
-    clusters = json.load(f)
 
 # Load the features for all the action centers
 with open('../Outputs/Task_2/KMeans_latent.json', 'r') as f:
@@ -252,7 +251,7 @@ def kmeans(label, feature_space,m):
         video_name.append(res[i][1])
     return
 
-def get_Label_features(label, feature_space, latent_features):
+def get_Label_features(label, feature_space, latent_features, isLDA):
 
     label_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE Action_Label='{label}';"
     c.execute(label_query)
@@ -273,11 +272,19 @@ def get_Label_features(label, feature_space, latent_features):
     averaged_array = np.mean(data, axis=0)
     reshaped_array = averaged_array.reshape(1, max_len)
 
-    dim_reduced_array = np.dot(reshaped_array, latent_features)
+    if isLDA:
+        lda_model = gensim.models.LdaModel.load("../Outputs/Task_2/lda_model")
+        dictionary = corpora.Dictionary.load("../Outputs/Task_2/dictionary")
+        string_data = []
+        for sublist in reshaped_array:
+            string_data.append(' '.join(map(str, sublist)))
+        return infer_new_document_lda(lda_model, dictionary, string_data)
+    
+    else:
+        dim_reduced_array = np.dot(reshaped_array, latent_features)
+        return dim_reduced_array
 
-    return dim_reduced_array
-
-def compare_distances(label_data, feature_space, latent_features, m):
+def compare_distances(label_data, feature_space, latent_features, m, isLDA):
 
     all_video_query = f"SELECT Video_Name, {Feature_Space_Map[feature_space]} FROM data WHERE videoID <= 2872;"
     c.execute(all_video_query)
@@ -295,7 +302,15 @@ def compare_distances(label_data, feature_space, latent_features, m):
     padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
     data = np.array(padded_data)
 
-    dim_reduced_data = np.dot(data, latent_features)
+    if isLDA:
+        lda_model = gensim.models.LdaModel.load("../Outputs/Task_2/lda_model")
+        dictionary = corpora.Dictionary.load("../Outputs/Task_2/dictionary")
+        string_data = []
+        for sublist in data:
+            string_data.append(' '.join(map(str, sublist)))
+        dim_reduced_data = infer_new_document_lda(lda_model, dictionary, string_data)
+    else:
+        dim_reduced_data = np.dot(data, latent_features)
 
     # Calculate the distance for all the video features to the query video.
     distances = cdist(label_data, dim_reduced_data, metric='euclidean').flatten()
@@ -314,6 +329,28 @@ def compare_distances(label_data, feature_space, latent_features, m):
 
     return dim_reduced_data
 
+def infer_new_document_lda(lda_model, dictionary, new_document):
+    
+    # Preprocess the new document: tokenize
+    new_tokens = [word_tokenize(string) for string in new_document]
+    
+    # Convert the new document to the bag-of-words representation using the trained dictionary
+    new_bow = [dictionary.doc2bow(token) for token in new_tokens]
+    
+    # Get the topic distribution for the new document
+    topic_distribution = [lda_model.get_document_topics(bow) for bow in new_bow]
+    
+    # Convert to a feature matrix (dimensionality-reduced representation)
+    def topic_vector(lda_output, num_topics):
+        vector = np.zeros(num_topics)
+        for topic_num, prob in lda_output:
+            vector[topic_num] = prob
+        return vector
+    
+    feature_matrix = np.array([topic_vector(doc, lda_model.num_topics) for doc in topic_distribution])
+
+    return feature_matrix
+
 
 def main():
 
@@ -325,14 +362,15 @@ def main():
     # Gather the feature space
     if latent_Semantic == 1:
         latent_features = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
-        label_data = get_Label_features(label, feature_space, latent_features)
-        compare_distances(label_data, feature_space, latent_features, m)
+        label_data = get_Label_features(label, feature_space, latent_features, False)
+        compare_distances(label_data, feature_space, latent_features, m, False)
     elif latent_Semantic == 2:
         latent_features = np.load('../Outputs/Task_2/SVD_right_matrix.npy')
-        label_data = get_Label_features(label, feature_space, latent_features)
-        compare_distances(label_data, feature_space, latent_features, m)
+        label_data = get_Label_features(label, feature_space, latent_features, False)
+        compare_distances(label_data, feature_space, latent_features, m, False)
     elif latent_Semantic == 3:
-        print('LDA')
+        label_data = get_Label_features(label, feature_space, np.empty(1) , True)
+        compare_distances(label_data, feature_space, np.empty(1), m, True)
     elif latent_Semantic == 4:
         kmeans(label, feature_space,m)
     else:

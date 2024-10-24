@@ -10,6 +10,9 @@ import cv2
 
 import numpy as np
 from scipy.spatial.distance import cdist
+import gensim
+import gensim.corpora as corpora
+from nltk.tokenize import word_tokenize
 from prettytable import PrettyTable
 
 import sqlite3
@@ -197,6 +200,28 @@ def kmeans_similarity(query_video, layer_number, l):
         video_name.append(res[i][1])
     return video_name
 
+def infer_new_document_lda(lda_model, dictionary, new_document):
+    
+    # Preprocess the new document: tokenize
+    new_tokens = [word_tokenize(string) for string in new_document]
+    
+    # Convert the new document to the bag-of-words representation using the trained dictionary
+    new_bow = [dictionary.doc2bow(token) for token in new_tokens]
+    
+    # Get the topic distribution for the new document
+    topic_distribution = [lda_model.get_document_topics(bow) for bow in new_bow]
+    
+    # Convert to a feature matrix (dimensionality-reduced representation)
+    def topic_vector(lda_output, num_topics):
+        vector = np.zeros(num_topics)
+        for topic_num, prob in lda_output:
+            vector[topic_num] = prob
+        return vector
+    
+    feature_matrix = np.array([topic_vector(doc, lda_model.num_topics) for doc in topic_distribution])
+
+    return feature_matrix
+
 def get_closest_videos(feature_space, query_feature, all_video_names, m):
 
     # Calculate the distance for all the video features to the query video.
@@ -289,14 +314,25 @@ def main():
         elif feature_space == 8:
             latent_semantic = np.load('../Outputs/Task_2/SVD_right_matrix.npy')
         elif feature_space == 9:
-            print("LDA")
+            lda_model = gensim.models.LdaModel.load("../Outputs/Task_2/lda_model")
+            dictionary = corpora.Dictionary.load("../Outputs/Task_2/dictionary")
+
+            string_data = []
+            for sublist in data:
+                string_data.append(' '.join(map(str, sublist)))
+            
+            all_topics = infer_new_document_lda(lda_model, dictionary, string_data)
+            query_data = []
+            for i in query_feature:
+                query_data.append(' '.join(map(str, query_feature)))
+            query_topics = infer_new_document_lda(lda_model, dictionary, query_data)
+            get_closest_videos(all_topics, query_topics, all_video_names, m)
+
         elif feature_space == 10:
             videos = kmeans_similarity(video_name, features, m)
 
-        # TODO
-        if feature_space in [7, 8, 9]:
+        if feature_space in [7, 8]:
             get_closest_videos(np.dot(data, latent_semantic), np.dot(query_feature, latent_semantic), all_video_names, m)
-            # print(np.shape(np.dot(data, latent_semantic)))
         
         
     input_type = int(input("Please Select Visualisation Techniques 1 - Opencv : "))
