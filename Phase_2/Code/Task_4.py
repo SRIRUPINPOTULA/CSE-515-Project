@@ -41,9 +41,6 @@ Dimensionality_Reduction_Map = {1: "PCA", 2: "SVD", 3: "LDA", 4:"KMeans"}
 with open('../database/category_map.json', 'r') as f:
     category_map = json.load(f)
 
-with open('../Output/cluster_centres.json', 'r') as f:
-    cluster_centre = json.load(f)
-
 #Maps to store the feature values
 kmeans_map = {}
 
