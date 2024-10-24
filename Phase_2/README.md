@@ -27,7 +27,7 @@ Phase_2/
 ```
 
 ## 1. Code:
-This directory consists of all the codes of the task, including the preprocessing and actual tasks.
+This directory consists of all the tasks' codes, including preprocessing and actual tasks.
 
 ### Util:
 
@@ -36,6 +36,16 @@ This Directory Consists of the corrected phase-1 code.
 Task_1.py: This is the phase-1 task1 code that has functions to extract the features from layer3, layer4, avgpool.
 
 Task_2.py: This is the phase-1 task2 code that has functions to extract the HoG and HoF features.
+
+KMeans.py: The python file consists of implementation code for KMeans, used as part of Task-2,3,4.
+
+LDA.py: The python file consists of the LDA implementation that is part of Task-2.
+
+PCA.py: The python file consists implementation of PCA that is used as part of Task-2,3,4.
+
+SVD.py: The python file consists implementation of PCA that is used as part of Task-2,3,4.
+
+Visualize.py: This file contains the implementation of color histograms using HoG and HoF.
 
 ### Task-0:
 
