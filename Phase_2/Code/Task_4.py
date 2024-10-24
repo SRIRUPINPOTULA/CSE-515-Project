@@ -4,6 +4,7 @@ import cv2
 import sqlite3
 import numpy as np
 from sklearn.cluster import KMeans
+
 #Establish connection to the database
 connection = sqlite3.connect('../database/Phase_2.db')
 c = connection.cursor()
@@ -12,9 +13,25 @@ c = connection.cursor()
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
 
-#Load the features for all the action centers
-with open('../Output/cluster_centres.json', 'r') as f:
+# Load the category map features that are extracted for each label
+with open('../database/category_map_kmeans.json', 'r') as f:
+    kmeans_preprocess = json.load(f)
+
+# Load the features for all the action centers
+with open('../database/action_centres.json', 'r') as f:
     clusters = json.load(f)
+
+# Load the features for all the action centers
+with open('../Output/cluster_centres.json', 'r') as f:
+    cluster_centre = json.load(f)
+
+target_labels = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow',
+                'cartwheel', 'hit', 'shoot_gun', 'hug', 'sit', 'catch',
+                'jump', 'situp', 'chew', 'kick', 'smile', 'clap', 'kick_ball', 'smoke',
+                'climb', 'somersault', 'climb_stairs', 'laugh', 'stand']
+
+Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
+Dimensionality_Reduction_Map = {1: "PCA", 2: "SVD", 3: "LDA", 4:"KMeans"}
 
 with open('../database/category_map.json', 'r') as f:
     category_map = json.load(f)
@@ -247,23 +264,57 @@ def kmeans(label, feature_space,m):
         print(f'{res[i][1]} : {res[i][0]}')
         video_name.append(res[i][1])
     return
-    
 
-#Define a main function
+def get_Label_features(feature_space, latent_features):
+    label_features = {}
+
+    for label in target_labels:
+        label_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE Action_Label='{label}';"
+        c.execute(label_query)
+        rows = c.fetchall()
+
+        cleaned_data = []
+        if feature_space in [1, 2, 3]:
+            for row in rows:
+                cleaned_data.append(list(map(float, row[0].strip("[]").split(","))))
+        elif feature_space in [4, 5]:
+            for row in rows:
+                cleaned_data.append(list(map(int, row[0].strip("[]").split())))
+
+        max_len = max(len(lst) for lst in cleaned_data)
+        padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
+        data = np.array(padded_data)
+
+        averaged_array = np.mean(data, axis=0)
+        reshaped_array = averaged_array.reshape(1, max_len)
+
+        dim_reduced_array = np.dot(reshaped_array, latent_features)
+
+        label_features[label] = dim_reduced_array
+
+    print(label_features)
+    return label_features
+
+
 def main():
-    #Gather the label
+
     label = input("Please provide the label: ")
-    #Gather the latent semantics
     latent_Semantic = int(input("Please Provide the Latent Semantics 1 - PCA, 2 - SVD, 3 - LDA, 4 - KMeans: "))
     m = int(input("Please provide a value for m: "))
-    #Gather the feature space
-    if latent_Semantic==1:
+    feature_space = int(input("Select the Feature Space used in Task 2: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4 - HOG, 5 - HOF, 6 - Color Histogram : "))
+
+    # Gather the feature space
+    if latent_Semantic == 1:
+        latent_features = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
+        label_data = get_Label_features(feature_space, latent_features)
         pca = pca()
-    elif latent_Semantic==2:
+    elif latent_Semantic == 2:
         svd = svd()
-    elif latent_Semantic==3:
+    elif latent_Semantic == 3:
         lda = lda()
-    else:
-        feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4 - HOG, 5 - HOF, 6 - Color Histogram : "))
+    elif latent_Semantic == 4:
         kmeans(label, feature_space,m)
+    else:
+        print("Invalid input.")
+
 main()

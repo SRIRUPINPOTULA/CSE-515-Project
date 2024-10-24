@@ -131,12 +131,13 @@ def kmeans_similarity(query_video, layer_number, l):
     with open('../Outputs/Task_2/KMeans_latent.json', 'r') as f:
         cluster_centres = json.load(f)
     layer=[]
+    found = False
     for video in target_data:
         if query_video in video:
             layer.extend(video[query_video])
             found=True
             break
-    if found ==False:
+    if found == False:
         for video in non_target_data:
             if query_video in video:
                 layer.extend(video[query_video])
@@ -199,7 +200,6 @@ def kmeans_similarity(query_video, layer_number, l):
 def get_closest_videos(feature_space, query_feature, all_video_names, m):
 
     # Calculate the distance for all the video features to the query video.
-    print(query_feature.shape, feature_space.shape)
     distances = cdist(query_feature, feature_space, metric='euclidean').flatten()
     # Sort the items based on distances
     indices = np.argsort(distances)[:m]
@@ -230,7 +230,6 @@ def main():
                 video_name = key
                 break
     
-    print("The Video name: ", video_name)
     feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram, 7 - PCA, 8 - SVD, 9 - LDA, 10 - KMEANS: "))
     m = int(input("Provide the value for m: "))
     
@@ -253,7 +252,10 @@ def main():
         rows = c.fetchall()
 
         cleaned_str = rows[0][0].strip("[]")
-        query_feature = list(map(int, cleaned_str.split()))
+        if features in [1, 2, 3]:
+            query_feature = list(map(float, cleaned_str.split(",")))
+        elif features in [4, 5]:
+            query_feature = list(map(int, cleaned_str.split()))
         query_feature = np.array(query_feature).reshape(1, -1)
 
         retrieval_query = f"SELECT Video_Name, {Feature_Space_Map[features]} FROM data WHERE videoID <= 2872;"
@@ -313,7 +315,7 @@ def main():
                         path=f'../dataset/target_videos/{query_video}'
                         found=True
                         break
-                if found ==False:
+                if found == False:
                     for video in non_target_data:
                         if query_video in video:
                             path=f'../dataset/non_target_videos/{query_video}'

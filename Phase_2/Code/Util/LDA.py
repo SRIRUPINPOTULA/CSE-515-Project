@@ -8,6 +8,8 @@ from gensim.models import LdaModel
 import nltk
 from nltk.tokenize import word_tokenize
 
+import logging
+
 
 def LDA(data, k, feature_space):
 
@@ -16,8 +18,11 @@ def LDA(data, k, feature_space):
     for sublist in data:
         string_data.append(' '.join(map(str, sublist)))
 
+    # To remove Package download messages during runtime
+    logging.getLogger('nltk').setLevel(logging.WARNING)
+    
     # Download NLTK Sentence Tokenizer
-    nltk.download('punkt')
+    nltk.download('punkt', quiet=True)
 
     # Tokenize the document
     tokens = [word_tokenize(string) for string in string_data]
