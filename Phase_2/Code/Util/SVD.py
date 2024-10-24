@@ -43,8 +43,8 @@ def SVD(data, latent_count, feature_space):
 
     # videoID-wieght pairs
     svd_data_json = {}
-    for index in enumerate(svd_data):
-        svd_data_json[index*2] = svd_data[index]
+    for index, data_row in enumerate(svd_data):
+        svd_data_json[index*2] = data_row.tolist()
 
     print(f"Top-{latent_count} latent Semantics for SVD")
     for index, eigenvalue in enumerate(singular_values[:latent_count]):
@@ -61,6 +61,8 @@ def SVD(data, latent_count, feature_space):
     with open('../Outputs/Task_2/SVD_right_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(V_subset.T)
+
+    np.save('../Outputs/Task_2/SVD_right_matrix.npy', V_subset)
 
     with open('../Outputs/Task_2/SVD_data.csv', 'w', newline='') as f:
         writer = csv.writer(f)

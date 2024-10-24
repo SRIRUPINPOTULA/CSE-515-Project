@@ -4,6 +4,7 @@
 # m, identifies and visualizes the most similar m target videos, along with
 # their scores, under the selected model or latent space.
 
+import os
 import json
 import cv2
 
@@ -195,6 +196,27 @@ def kmeans_similarity(query_video, layer_number, l):
         video_name.append(res[i][1])
     return video_name
 
+def get_closest_videos(feature_space, query_feature, all_video_names, m):
+
+    # Calculate the distance for all the video features to the query video.
+    print(query_feature.shape, feature_space.shape)
+    distances = cdist(query_feature, feature_space, metric='euclidean').flatten()
+    # Sort the items based on distances
+    indices = np.argsort(distances)[:m]
+
+    # Print the items
+    print(f"\n Top-{m} Closest Videos: ")
+    t = PrettyTable(["Rank", "Video Name", "Distance"])
+    # Append the results to a list for visualisation
+    rank = 1
+    result_names = []
+    for idx in indices:
+        t.add_row([rank, all_video_names[idx], distances[idx]])
+        result_names.append(all_video_names[idx])
+        rank += 1
+    print(t)
+    return result_names
+
 def main():
     input_type = int(input("Provide the 1 - Video File Name or 2 - VideoID: "))
     if input_type == 1:
@@ -211,6 +233,9 @@ def main():
     print("The Video name: ", video_name)
     feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram, 7 - PCA, 8 - SVD, 9 - LDA, 10 - KMEANS: "))
     m = int(input("Provide the value for m: "))
+    
+    Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
+    Dimensionality_Reduction_Map = {7: "PCA", 8: "SVD", 9: "LDA", 10:"KMeans"}
     if feature_space in [1, 2, 3]:
         videos = layer3_implementation(video_name, feature_space, m)
     elif feature_space == 4:
@@ -219,15 +244,58 @@ def main():
         videos = BOF(video_name,'BOF_HOF', m)
     elif feature_space == 6:
         print("Histograms")
-    elif feature_space == 7:
-        print("PCA")
-    elif feature_space == 8:
-        print("SVD")
-    elif feature_space == 9:
-        print("LDA")
-    elif feature_space == 10:
+    elif feature_space in [7, 8, 9, 10]:
+
         features = int(input("Select the Feature Space selected for Task2 : 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram: "))
-        videos = kmeans_similarity(video_name, features, m)
+        
+        # get data from db
+        c.execute(f"SELECT {Feature_Space_Map[features]} FROM data WHERE Video_Name='{video_name}'")
+        rows = c.fetchall()
+
+        cleaned_str = rows[0][0].strip("[]")
+        query_feature = list(map(int, cleaned_str.split()))
+        query_feature = np.array(query_feature).reshape(1, -1)
+
+        retrieval_query = f"SELECT Video_Name, {Feature_Space_Map[features]} FROM data WHERE videoID <= 2872;"
+        c.execute(retrieval_query)
+        rows = c.fetchall()
+
+        all_video_names = []
+        cleaned_data = []
+        if features in [1, 2, 3]:
+            for row in rows:
+                cleaned_data.append(list(map(float, row[1].strip("[]").split(","))))
+                all_video_names.append(row[0])
+        elif features in [4, 5]:
+            for row in rows:
+                cleaned_data.append(list(map(int, row[1].strip("[]").split())))
+                all_video_names.append(row[0])
+
+        max_len = max(len(lst) for lst in cleaned_data)
+        padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
+        data = np.array(padded_data)
+
+        # check if latent semantics present in Outputs/Task2
+        check_file_name = f"../Outputs/Task_2/videoID-weight_{Dimensionality_Reduction_Map[feature_space]}_{Feature_Space_Map[features]}.json"
+        if not os.path.exists(check_file_name):
+            print(f"File not found. {check_file_name}")
+            print("Latent Semantics were not prepared in Task 2")
+            quit()
+
+        if feature_space == 7:
+            latent_semantic = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
+        elif feature_space == 8:
+            latent_semantic = np.load('../Outputs/Task_2/SVD_right_matrix.npy')
+        elif feature_space == 9:
+            print("LDA")
+        elif feature_space == 10:
+            videos = kmeans_similarity(video_name, features, m)
+
+        # TODO
+        if feature_space in [7, 8, 9]:
+            get_closest_videos(np.dot(data, latent_semantic), np.dot(query_feature, latent_semantic), all_video_names, m)
+            # print(np.shape(np.dot(data, latent_semantic)))
+        
         
     input_type = int(input("Please Select Visualisation Techniques 1 - Opencv : "))
     if input_type == 1:

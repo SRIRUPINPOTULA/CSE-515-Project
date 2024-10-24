@@ -31,8 +31,8 @@ def PCA(data, latent_count, feature_space):
 
     # videoID-wieght pairs
     pca_data_json = {}
-    for index in enumerate(pca_data):
-        pca_data_json[index*2] = pca_data[index]
+    for index, data_row in enumerate(pca_data):
+        pca_data_json[index*2] = data_row.tolist()
 
     print(f"Top-{latent_count} latent Semantics for PCA")
     for index, eigenvalue in enumerate(eigenvalues_subset):
@@ -41,6 +41,8 @@ def PCA(data, latent_count, feature_space):
     with open('../Outputs/Task_2/PCA_left_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(left_matrix)
+
+    np.save('../Outputs/Task_2/PCA_left_matrix.npy', left_matrix)
     
     with open('../Outputs/Task_2/PCA_core_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
