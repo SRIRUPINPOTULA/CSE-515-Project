@@ -12,20 +12,31 @@ c = connection.cursor()
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
 
-#Load the category map features that are extracted for each label
-with open('../database/category_map_kmeans.json', 'r') as f:
-    kmeans_preprocess = json.load(f)
-
 #Load the features for all the action centers
-with open('../database/action_centres.json', 'r') as f:
+with open('../Output/cluster_centres.json', 'r') as f:
     clusters = json.load(f)
 
-# #Calculate the Euclidean Distance
-# def euclidean(a, b):
-#     distance_res=0
-#     for i in range(0, len(a)):
-#         distance_res += (a[i] - b[i])**2
-#     return distance_res ** 0.5
+with open('../database/category_map.json', 'r') as f:
+    category_map = json.load(f)
+
+with open('../Output/cluster_centres.json', 'r') as f:
+    cluster_centre = json.load(f)
+    
+#List for the tatget videos
+target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
+                'cartwheel', 'hit', 'shoot_gun', 'hug', 'sit', 'catch', 
+                'jump', 'situp', 'chew', 'kick', 'smile', 'clap', 'kick_ball', 'smoke',
+                'climb', 'somersault', 'climb_stairs', 'laugh', 'stand']
+
+#Maps to store the feature values
+kmeans_map = {}
+
+#Calculate the Euclidean Distance
+def euclidean(a, b):
+    distance_res=0
+    for i in range(0, len(a)):
+        distance_res += (a[i] - b[i])**2
+    return distance_res ** 0.5
 
 def manhattan(a, b):
     res=0
@@ -42,14 +53,148 @@ def svd():
 def lda():
     return
 
-#Functio that lists m similar videos
+#Function to calculate the mean
+def feature_calculator(layer):
+    feauter_np = np.array(layer)
+    mean_feature = np.mean(feauter_np, axis=0)
+    return mean_feature.tolist()
+
+#Function to calculate the cluuster centres for all the video labels
+def kmeans_preprocess_func(action, feature_space):
+    layer_1=[]
+    layer_2=[]
+    layer_3=[]
+    layer_1_cluster_centres = cluster_centre
+    #For each category make a feature matrix 
+    if feature_space==1:
+        for videoname, category in category_map.items():
+            if category==action:
+                for video in target_data:
+                    if videoname in video:
+                        a=[]
+                        a.extend(video[videoname])
+                        layer_1.append(a[0])
+        #Layer 1 Features for a action label
+        layer_1_cluster_centres = cluster_centre
+        layer_map=[]
+        #For each video feature compute the distance with cluster center
+        for i in range(len(layer_1)):
+            a=[]
+            for j in range(len(layer_1_cluster_centres)):
+                dist=euclidean(layer_1[i],layer_1_cluster_centres[j])
+                a.append(dist)
+            layer_map.append(a)
+        total_layer_5 = feature_calculator(layer_map)
+    #For each category make a feature matrix 
+    elif feature_space==2:
+        for videoname, category in category_map.items():
+            if category==action:
+                for video in target_data:
+                    if videoname in video:
+                        a=[]
+                        a.extend(video[videoname])
+                        layer_2.append(a[1])
+        layer_2_cluster_centres = cluster_centre
+        layer_map=[]
+        #For each video feature compute the distance with cluster center
+        for i in range(len(layer_2)):
+            a=[]
+            for j in range(len(layer_2_cluster_centres)):
+                dist=euclidean(layer_2[i],layer_2_cluster_centres[j])
+                a.append(dist)
+            layer_map.append(a)
+        #For each category make a for layer2
+        total_layer_5 = feature_calculator(layer_map)
+    elif feature_space==3:
+        for videoname, category in category_map.items():
+            if category==action:
+                for video in target_data:
+                    if videoname in video:
+                        a=[]
+                        a.extend(video[videoname])
+                        layer_3.append(a[2])
+        #Similar find the features for the layer3
+        layer_3_cluster_centres = cluster_centre
+        layer_map=[]
+        #For each video feature compute the distance with cluster center
+        for i in range(len(layer_3)):
+            a=[]
+            for j in range(len(layer_3_cluster_centres)):
+                dist=euclidean(layer_3[i],layer_3_cluster_centres[j])
+                a.append(dist)
+            layer_map.append(a)
+        total_layer_5 = feature_calculator(layer_map)
+    ####Integrate all the features for HoG
+    elif feature_space==4:
+        layer_4=[]
+        #For each video extract the HoG features
+        for videoname, category in category_map.items():
+            if category==action:
+                for video in target_data:
+                    if videoname in video:
+                        get_query_video_feature = f"SELECT {'BOF_HOG'} FROM data WHERE Video_Name = '{videoname}';"
+                        c.execute(get_query_video_feature)
+                        rows = c.fetchall()
+                        cleaned_str = rows[0][0].strip("[]")
+                        query_feature = list(map(int, cleaned_str.split()))
+                        #query_feature = np.array(query_feature).reshape(1, -1)
+                        layer_4.append(query_feature)
+        #Make a numpy array for all the features which are HoG
+        layer_4_cluster_centres = layer_1_cluster_centres
+        layer_map=[]
+        for i in range(len(layer_4)):
+            a=[]
+            for j in range(len(layer_4_cluster_centres)):
+                dist=euclidean(layer_4[i],layer_4_cluster_centres[j])
+                a.append(dist)
+            layer_map.append(a)
+        #Total features for layer4
+        total_layer_5 = feature_calculator(layer_map)
+    #Gather all the features for HoF
+    else:
+        layer_5=[]
+        for videoname, category in category_map.items():
+            if category==action:
+                for video in target_data:
+                    if videoname in video:
+                        get_query_video_feature = f"SELECT {'BOF_HOF'} FROM data WHERE Video_Name = '{videoname}';"
+                        c.execute(get_query_video_feature)
+                        rows = c.fetchall()
+                        cleaned_str = rows[0][0].strip("[]")
+                        query_feature = list(map(int, cleaned_str.split()))
+                        #query_feature = np.array(query_feature).reshape(1, -1)
+                        layer_5.append(query_feature)
+        #Make a numpy array for all the features which are HoF
+        layer_5_cluster_centres = layer_1_cluster_centres
+        layer_map=[]
+        for i in range(len(layer_5)):
+            a=[]
+            for j in range(len(layer_5_cluster_centres)):
+                dist=euclidean(layer_5[i],layer_5_cluster_centres[j])
+                a.append(dist)
+            layer_map.append(a)
+        #Total features for HoG
+        total_layer_5 = feature_calculator(layer_map)
+    final_features =[total_layer_5]
+    kmeans_map[action]=final_features
+    return
+
+
+#Function that lists m similar videos
 def kmeans(label, feature_space,m):
+    for video in target_videos:
+        kmeans_preprocess_func(video, feature_space)
+    with open('../database/category_map_kmeans.json', 'w') as f:
+        json.dump(kmeans_map,f)
+    #Load the category map features that are extracted for each label
+    with open('../database/category_map_kmeans.json', 'r') as f:
+        kmeans_preprocess = json.load(f)
     #Extract the label feature 
     query_features=kmeans_preprocess[label]
-    query_feature = query_features[feature_space-1]
+    query_feature = query_features[0]
     #For a specific cluster extract the centroids
-    all_clusters = clusters[label]
-    cluster_centre = all_clusters[feature_space-1]
+    #cluster_centre = all_clusters[feature_space-1]
+    
     res=[]
     #For the target videos gather the features
     for video in target_data:
