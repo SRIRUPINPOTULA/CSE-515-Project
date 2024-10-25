@@ -14,16 +14,21 @@ Phase_2/
 ├── database/                   # Contains the db and json files
 │
 ├── dataset/                    # Contains the video data split as target and non target
-│   ├── non_target_videos/      # Contains non target videos
-│   └── target_videos/          # Contains target videos
+│   ├── non_target_videos/
+│   └── target_videos/
 │
 ├── dataset_stips/              # Contains the video STIPs data split as target and non target
-│   ├── non_target_videos/      # Contains non target videos STIPs
-│   └── target_videos/          # Contains target videos STIPs
+│   ├── non_target_videos/
+│   └── target_videos/
 │
 ├── hmdb51_org/                 # Contains all the original data videos
 │
-└── hmdb51_org_stips/           # Contains all the original videos STIPs data
+├── hmdb51_org_stips/           # Contains all the original videos STIPs data
+│
+├── Outputs/                    # Contains all the required Outputs from the Tasks
+│   └── Task_2/
+│
+└── Report/                     # Contains the report for Phase-2
 ```
 
 ## 1. Code:
