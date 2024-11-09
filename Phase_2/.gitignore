@@ -1,0 +1,6 @@
+dataset/non_target_videos/
+dataset/target_videos/
+dataset_stips/non_target_videos/
+dataset_stips/target_videos/
+hmdb51_org
+hmdb51_org_stips
