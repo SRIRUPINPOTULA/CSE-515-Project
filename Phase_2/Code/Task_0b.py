@@ -51,6 +51,7 @@ def euclidean(a, b):
     for i in range(0, len(a)):
         distance_res += (a[i] - b[i])**2
     return distance_res ** 0.5
+
 # Function to find the m most similar video
 def BOF(query_video, feature, l):
     #Gather the video features for the query video from the database
@@ -197,5 +198,7 @@ def main():
                 query_video = input("Enter the Video name: ")
                 #Call the function to visualise the video
                 Visualize_HoG_HoF(BOF_feature_name, query_video)
-#Call the main function
-main()
+
+
+if __name__ == "__main__":
+    main()

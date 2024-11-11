@@ -109,7 +109,8 @@ def nearest_search(query_video, layer_number, l):
     print("******The \"m\" most similar labels for the video are: ********")
     for i in range(0, l):
         print(f'{res[i][1]} : {res[i][0]}')
-#main function that takes the input from the user
+
+# main function that takes the input from the user
 def main():
     #Gather the video name or id.
     input_type = int(input("Provide the 1 - Video File Name or 2 - VideoID: "))
@@ -134,6 +135,6 @@ def main():
         videos = HoF(video_name, 2,m)
     else:
         print("Histograms")
-main()
 
-        
+
+main()
