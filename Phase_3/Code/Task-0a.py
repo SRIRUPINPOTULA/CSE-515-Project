@@ -7,7 +7,7 @@ import csv
 import json
 import numpy as np
 
-connection = sqlite3.connect('../database/Phase_2.db')
+connection = sqlite3.connect('../database/Phase_3.db')
 c = connection.cursor()
 with open('../database/total_target_features.json', 'r') as f:
     target_data = json.load(f)
@@ -35,7 +35,7 @@ def mean_eigen_value(feature_matrix):
 
 def pca_helper(feature_space, action):
     Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
-    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label == '{action}';"
+    retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE All_Label == '{action}';"
     c.execute(retrieval_query)
     rows = c.fetchall()
 
