@@ -14,34 +14,35 @@ def PCA(data, latent_count, feature_space):
     # Sort the eigenvalues to get the top latent semantics
     sorted_indices = np.argsort(eigenvalues)[::-1]
     sorted_eigenvalues = eigenvalues[sorted_indices]
-    sorted_eigenvectors = eigenvectors[:, sorted_indices]
+    return sorted_eigenvalues
+    #sorted_eigenvectors = eigenvectors[:, sorted_indices]
 
-    eigenvalues_subset = sorted_eigenvalues[:latent_count]
-    eigenvectors_subset = sorted_eigenvectors[:, :latent_count]
+    #eigenvalues_subset = sorted_eigenvalues[:latent_count]
+    #eigenvectors_subset = sorted_eigenvectors[:, :latent_count]
 
     # Left factor matrix: Principal components (eigenvectors)
-    left_matrix = eigenvectors_subset
+    #left_matrix = eigenvectors_subset
     # Right factor matrix: Principal components (eigenvectors) ^ Transpose
-    right_matrix = eigenvectors_subset.T
+    #right_matrix = eigenvectors_subset.T
     # Core matrix: Diagnal matrix of Eigenvalues
-    core_matrix = np.zeros((latent_count, latent_count), dtype=float)
-    np.fill_diagonal(core_matrix, sorted_eigenvalues[:latent_count])
+    #core_matrix = np.zeros((latent_count, latent_count), dtype=float)
+    # np.fill_diagonal(core_matrix, sorted_eigenvalues[:latent_count])
     
     # Data in Reduced Dimensional space
-    pca_data = np.dot(data, eigenvectors_subset)
+    # pca_data = np.dot(data, eigenvectors_subset)
 
-    # videoID-wieght pairs
-    pca_data_json = {}
-    for index, data_row in enumerate(pca_data):
-        pca_data_json[index*2] = data_row.tolist()
+    # # videoID-wieght pairs
+    # pca_data_json = {}
+    # for index, data_row in enumerate(pca_data):
+    #     pca_data_json[index*2] = data_row.tolist()
     
-    eigen_values=[]
+    # eigen_values=[]
     
-    print(f"Top-{latent_count} latent Semantics for PCA")
-    for index, eigenvalue in enumerate(eigenvalues_subset):
-        print(f"{index} - {eigenvalue}")
-        eigen_values.append(eigenvalue)
-    return eigen_values
+    # print(f"Top-{latent_count} latent Semantics for PCA")
+    # for index, eigenvalue in enumerate(eigenvalues_subset):
+    #     print(f"{index} - {eigenvalue}")
+    #     eigen_values.append(eigenvalue)
+    # return eigen_values
 
     # with open('../Outputs/Task_2/PCA_left_matrix.csv', 'w', newline='') as f:
     #     writer = csv.writer(f)
