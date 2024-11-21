@@ -1,11 +1,12 @@
 import json
-from sklearn.cluster import KMeans
 import sqlite3
 #Establish connection to database
 from Util.PCA import PCA
 import csv
 import json
 import numpy as np
+
+max_ans = 0
 
 connection = sqlite3.connect('../database/Phase_3.db')
 c = connection.cursor()
@@ -47,23 +48,26 @@ def pca_helper(feature_space, action):
     elif feature_space in [4, 5]:
         for row in rows:
             cleaned_data.append(list(map(int, row[0].strip("[]").split())))
-
-    data = np.array(cleaned_data)
+    max_len = max(len(lst) for lst in cleaned_data)
+    padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
+    data = np.array(padded_data)
     eigen_value_list = []
-    eigen_value_list = PCA(data, 1, Feature_Space_Map[feature_space])
+    cov_matrix = np.cov(data, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+    sorted_indices = np.argsort(eigenvalues)[::-1]
+    sorted_eigenvalues = eigenvalues[sorted_indices]
+    eigen_value_list = sorted_eigenvalues
     ans = mean_eigen_value(eigen_value_list)
-    # min_threshold = float('inf')
-    # diff=[]
-    # for i in range(0, len(eigen_value_list)-1):
-    #     curr_diff = eigen_value_list[i] - eigen_value_list[i+1]
-    #     diff.append(curr_diff)
-    # element = max(diff)
-    # index = diff.index(element)
+    
     print(f"The Inherent Dimensionality for {action} element is: ", ans)
+    return ans
 
 def main():
-    feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram : "))
+    feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF : "))
+    max_ans = 0
     for i in range(0, len(target_videos)):
-        pca_helper(feature_space, target_videos[i])
+        ans = pca_helper(feature_space, target_videos[i])
+        max_ans = max(max_ans, ans)
+    print("The amx_ans is : ", max_ans)
     
 main()
