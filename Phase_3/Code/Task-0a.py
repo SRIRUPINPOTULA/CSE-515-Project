@@ -6,8 +6,6 @@ import csv
 import json
 import numpy as np
 
-max_ans = 0
-
 connection = sqlite3.connect('../database/Phase_3.db')
 c = connection.cursor()
 with open('../database/total_target_features.json', 'r') as f:
@@ -64,10 +62,6 @@ def pca_helper(feature_space, action):
 
 def main():
     feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF : "))
-    max_ans = 0
     for i in range(0, len(target_videos)):
-        ans = pca_helper(feature_space, target_videos[i])
-        max_ans = max(max_ans, ans)
-    print("The amx_ans is : ", max_ans)
-    
+        pca_helper(feature_space, target_videos[i])
 main()
