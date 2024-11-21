@@ -1,7 +1,6 @@
 import json
 import sqlite3
 #Establish connection to database
-from Util.PCA import PCA
 import csv
 import json
 import numpy as np
@@ -58,10 +57,10 @@ def pca_helper(feature_space, action):
     ans = mean_eigen_value(eigen_value_list)
     
     print(f"The Inherent Dimensionality for {action} element is: ", ans)
-    return ans
 
 def main():
     feature_space = int(input("Select a Feature Space from the following: 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF : "))
     for i in range(0, len(target_videos)):
-        pca_helper(feature_space, target_videos[i])
+       pca_helper(feature_space, target_videos[i])
+    
 main()
