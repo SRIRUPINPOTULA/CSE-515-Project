@@ -56,12 +56,12 @@ def LDA(data, k, feature_space):
     for idx, topic in lda_model.print_topics(-1):
         print(f"Topic {idx}: {topic}")
     
-    with open("../Outputs/Task_2/LDA_latent.json", "w") as json_file:
+    with open(f"../Outputs/Task_2/LDA_{feature_space}_{k}_latent.json", "w") as json_file:
         json.dump(lda_model.print_topics(-1), json_file, indent=4)
 
     with open(f'../Outputs/Task_2/videoID-weight_LDA_{feature_space}.json', 'w') as f:
         json.dump(lda_data_json, f, indent=4)
 
     # Save the model and dictionary to reuse for next Task
-    lda_model.save("../Outputs/Task_2/lda_model")
-    dictionary.save("../Outputs/Task_2/dictionary")
+    lda_model.save(f"../Outputs/Task_2/lda_{feature_space}_{k}_model")
+    dictionary.save(f"../Outputs/Task_2/lda_{feature_space}_{k}_dictionary")

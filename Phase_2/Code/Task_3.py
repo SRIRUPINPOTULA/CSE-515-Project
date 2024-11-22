@@ -189,6 +189,8 @@ def main():
     elif feature_space in [7, 8, 9, 10]:
 
         features = int(input("Select the Feature Space selected for Task2 : 1 - Layer3, 2 - Layer4, 3 - AvgPool, 4- HOG, 5 - HOF, 6 - Color Histogram: "))
+        # TODO: rephrase this question
+        s = int("How many latent semantics: ")
         
         # get data from db
         c.execute(f"SELECT {Feature_Space_Map[features]} FROM data WHERE Video_Name='{video_name}'")
@@ -221,19 +223,19 @@ def main():
         data = np.array(padded_data)
 
         # check if latent semantics present in Outputs/Task2
-        check_file_name = f"../Outputs/Task_2/videoID-weight_{Dimensionality_Reduction_Map[feature_space]}_{Feature_Space_Map[features]}.json"
+        check_file_name = f"../Outputs/Task_2/videoID-weight_{Dimensionality_Reduction_Map[feature_space]}_{Feature_Space_Map[features]}_{s}.json"
         if not os.path.exists(check_file_name):
             print(f"File not found. {check_file_name}")
             print("Latent Semantics were not prepared in Task 2")
             quit()
         # load the latent semantics
         if feature_space == 7:
-            latent_semantic = np.load('../Outputs/Task_2/PCA_left_matrix.npy')
+            latent_semantic = np.load(f'../Outputs/Task_2/PCA_{Feature_Space_Map[features]}_{s}_left_matrix.npy')
         elif feature_space == 8:
-            latent_semantic = np.load('../Outputs/Task_2/SVD_right_matrix.npy')
+            latent_semantic = np.load(f'../Outputs/Task_2/SVD_{Feature_Space_Map[features]}_{s}_right_matrix.npy')
         elif feature_space == 9:
-            lda_model = gensim.models.LdaModel.load("../Outputs/Task_2/lda_model")
-            dictionary = corpora.Dictionary.load("../Outputs/Task_2/dictionary")
+            lda_model = gensim.models.LdaModel.load(f"../Outputs/Task_2/lda_{Feature_Space_Map[features]}_{s}_model")
+            dictionary = corpora.Dictionary.load(f"../Outputs/Task_2/lda_{Feature_Space_Map[features]}_{s}_dictionary")
 
             string_data = []
             for sublist in data:

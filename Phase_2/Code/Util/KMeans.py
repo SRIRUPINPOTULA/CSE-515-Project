@@ -113,9 +113,9 @@ def kmeans_clustering(s, feature_model):
             video_weight[videoID[video_name]]=minimum_val
     sorted_video_weight = dict(sorted(video_weight.items(), key=lambda x:x[1], reverse=True))
     res=[sorted_video_weight]
-    with open('../Outputs/Task_2/KMeans_latent.json', 'w') as f:
+    with open(f'../Outputs/Task_2/KMeans_{Feature_Space_Map[feature_model]}_{s}latent.json', 'w') as f:
         json.dump(cluster_centre_list, f, indent=4)
-    with open(f'../Outputs/Task_2/videoID-weight_KMeans_{Feature_Space_Map[feature_model]}.json', 'w') as f:
+    with open(f'../Outputs/Task_2/videoID-weight_KMeans_{Feature_Space_Map[feature_model]}_{s}.json', 'w') as f:
         json.dump(res, f, indent=4)
     print(f"******The \"{s}\" latent semantics are: ********")
     

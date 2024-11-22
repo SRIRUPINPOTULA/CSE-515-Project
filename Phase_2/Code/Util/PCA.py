@@ -38,15 +38,15 @@ def PCA(data, latent_count, feature_space):
     for index, eigenvalue in enumerate(eigenvalues_subset):
         print(f"{index} - {eigenvalue}")
 
-    with open('../Outputs/Task_2/PCA_left_matrix.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/PCA_{feature_space}_{latent_count}_left_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(left_matrix)
 
-    np.save('../Outputs/Task_2/PCA_left_matrix.npy', left_matrix)
+    np.save(f'../Outputs/Task_2/PCA_{feature_space}_{latent_count}_left_matrix.npy', left_matrix)
     
-    with open('../Outputs/Task_2/PCA_core_matrix.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/PCA_{feature_space}_{latent_count}_core_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(core_matrix)
     
-    with open(f'../Outputs/Task_2/videoID-weight_PCA_{feature_space}.json', 'w') as f:
+    with open(f'../Outputs/Task_2/videoID-weight_PCA_{feature_space}_{latent_count}.json', 'w') as f:
         json.dump(pca_data_json, f, indent=4)

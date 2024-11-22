@@ -50,23 +50,23 @@ def SVD(data, latent_count, feature_space):
     for index, eigenvalue in enumerate(singular_values[:latent_count]):
         print(f"{index} - {eigenvalue}")
     
-    with open('../Outputs/Task_2/SVD_left_matrix.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/SVD_{feature_space}_{latent_count}_left_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(U_subset)
     
-    with open('../Outputs/Task_2/SVD_core_matrix.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/SVD_{feature_space}_{latent_count}_core_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(Sigma)
 
-    with open('../Outputs/Task_2/SVD_right_matrix.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/SVD_{feature_space}_{latent_count}_right_matrix.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(V_subset.T)
 
-    np.save('../Outputs/Task_2/SVD_right_matrix.npy', V_subset)
+    np.save(f'../Outputs/Task_2/SVD_{feature_space}_{latent_count}_right_matrix.npy', V_subset)
 
-    with open('../Outputs/Task_2/SVD_data.csv', 'w', newline='') as f:
+    with open(f'../Outputs/Task_2/SVD_{feature_space}_{latent_count}_data.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(svd_data)
 
-    with open(f'../Outputs/Task_2/videoID-weight_SVD_{feature_space}.json', 'w') as f:
+    with open(f'../Outputs/Task_2/videoID-weight_SVD_{feature_space}_{latent_count}.json', 'w') as f:
         json.dump(svd_data_json, f, indent=4)
