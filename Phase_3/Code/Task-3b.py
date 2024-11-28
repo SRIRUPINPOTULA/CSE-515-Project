@@ -2,7 +2,6 @@ import os
 import sqlite3
 import json
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
@@ -47,6 +46,9 @@ class VideoSearchTool:
                 self.lsh_index[layer][hash_key] = []
             self.lsh_index[layer][hash_key].append(video_id)
     
+    def euclidean_distance(self, vec1, vec2):
+        return np.linalg.norm(vec1 - vec2)
+
     def search(self, query_video_id, t):
         query_features = self.video_features[query_video_id]
         candidates = set()
@@ -66,17 +68,18 @@ class VideoSearchTool:
                 overall_candidates += len(self.lsh_index[layer][hash_key])
         
         similarity_scores = [
-            (video_id, cosine_similarity([query_features], [self.video_features[video_id]])[0][0])
+            (video_id, self.euclidean_distance(query_features, self.video_features[video_id]))
             for video_id in candidates
         ]
-        similarity_scores.sort(key=lambda x: x[1], reverse=True)
+
+        similarity_scores.sort(key=lambda x: x[1])
         
         top_videos = similarity_scores[:t]
 
         print(f"Unique Candidates: {len(candidates)}")
         print(f"Overall Candidates: {overall_candidates}")
         for video_id, score in top_videos:
-            print(f"Video {video_id}: Similarity {score:.4f}")
+            print(f"Video {video_id}: Distance {score:.4f}")
         
         self.display_thumbnails_grid(top_videos)
     
