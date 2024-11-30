@@ -5,14 +5,8 @@ import csv
 import json
 import numpy as np
 
-connection = sqlite3.connect('../database/Phase_3.db')
+connection = sqlite3.connect('../Database/Phase_3.db')
 c = connection.cursor()
-with open('../database/total_target_features.json', 'r') as f:
-    target_data = json.load(f)
-with open('../database/videoID.json', 'r') as f:
-    videoID = json.load(f)
-with open('../database/category_map.json', 'r') as f:
-    category_map = json.load(f)
 
 target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
                 'cartwheel', 'hit', 'shoot_gun', 'hug', 'sit', 'catch', 
