@@ -23,14 +23,20 @@ def create_hyperplanes_from_data(vectors, num_layers, hashes_per_layer):
         w = (dot_max - dot_min) / 10  # Example: divide range into 10 buckets
         print(f"Layer {layer + 1} Selected w: {w}")
 
+        # Generate random biases
         biases = np.random.uniform(dot_min, dot_max, size=hashes_per_layer)
         print(f"Layer {layer + 1} Random Biases: {biases}")
 
         for idx, vector in enumerate(vectors):
             hash_key = tuple(
-                int(np.floor((np.dot(vector, hyperplane) + bias) / w))
+                # Hash formula using floor to quantize the projection values into buckets
+                int(np.floor((np.dot(vector, hyperplane) + bias) / w))  # Applying floor
                 for hyperplane, bias in zip(hyperplanes, biases)
             )
+            
+            # Ensure the hash values fall within the range [0, 9] by clamping
+            hash_key = tuple(max(0, min(9, val)) for val in hash_key)
+
             if hash_key not in lsh_index[layer]:
                 lsh_index[layer][hash_key] = []
             lsh_index[layer][hash_key].append(idx)
