@@ -13,13 +13,13 @@ class VideoSearchTool:
         self.feature_column = feature_column
         self.dimensionality_reduction = dimensionality_reduction
         self.num_layers = num_layers
-        self.hashes_per_layer = hashes_per_layer
-        self.w = w
-        self.Feature_Space_Map = Feature_Space_Map
-        self.thumbnail_dir = thumbnail_dir
-        self.lsh_index = {layer: {} for layer in range(num_layers)}
-        self.video_features = {}
-        self.load_data()
+        self.hashes_per_layer = hashes_per_layer # Hash functions per LSH layer
+        self.w = w # Bucket width for LSH
+        self.Feature_Space_Map = Feature_Space_Map  # Mapping of feature columns
+        self.thumbnail_dir = thumbnail_dir # Directory containing video thumbnails
+        self.lsh_index = {layer: {} for layer in range(num_layers)} #initialise LSH index
+        self.video_features = {} # Dictionary to store video features
+        self.load_data() #to get preprocessed data
 
     def load_data(self):
         conn = sqlite3.connect(self.db_path)
@@ -34,15 +34,16 @@ class VideoSearchTool:
         for row in cursor.execute(query):
             videoID, feature_data = row
             if feature_column in ["Layer_3", "AvgPool"]:
-                feature_vector = np.array(json.loads(feature_data))
+                feature_vector = np.array(json.loads(feature_data)) # Parse JSON feature
             else:
                 feature_data = feature_data.strip("[]").split()
-                feature_vector = np.array(feature_data, dtype=int)
+                feature_vector = np.array(feature_data, dtype=int) # Parse space-separated data
             raw_features.append(feature_vector)
             video_ids.append(videoID)
         
         conn.close()
 
+        # Ensure feature vectors have consistent size
         processed_arrays = []
         for arr in raw_features:
             if len(arr) < 480:
@@ -56,13 +57,14 @@ class VideoSearchTool:
 
         raw_features = np.array(processed_arrays)
         reduced_features = self.apply_dimensionality_reduction(raw_features, self.dimensionality_reduction)
-
+        # Store processed features and add to LSH index
         for video_id, feature_vector in zip(video_ids, reduced_features):
             self.video_features[video_id] = feature_vector
             self.add_to_lsh(video_id, feature_vector)
 
     def apply_dimensionality_reduction(self, data, dimensionality_reduction):
         if dimensionality_reduction=='PCA':
+            # Perform PCA to reduce dimensionality
             row, column = data.shape
             latent_count = min(256, column)
             cov_matrix = np.cov(data, rowvar=False)
@@ -100,9 +102,11 @@ class VideoSearchTool:
     
     def add_to_lsh(self, video_id, feature_vector):
         for layer in range(self.num_layers):
+            # Generate random hyperplanes and biases for hashing
             rp = np.random.randn(self.hashes_per_layer, feature_vector.shape[0])
             biases = np.random.uniform(0, self.w, size=self.hashes_per_layer)
             
+            # Compute hash keys for the feature vector
             hash_key = tuple(
                 int(np.floor((np.dot(feature_vector, hyperplane) + bias) / self.w))
                 for hyperplane, bias in zip(rp, biases)
@@ -114,12 +118,12 @@ class VideoSearchTool:
         #print(f"Layer {layer} LSH index size: {len(self.lsh_index[layer])}")
     
     def euclidean_distance(self, vec1, vec2):
-        return np.linalg.norm(vec1 - vec2)
+        return np.linalg.norm(vec1 - vec2) # Get euclidean distance
 
     def search(self, query_video_id, t):
         query_features = self.video_features[query_video_id]
         print("THe query features are: ", query_features)
-        candidates = set()
+        candidates = set() # Unique candidates from LSH index
         overall_candidates = 0
         
         for layer in range(self.num_layers):
@@ -134,15 +138,15 @@ class VideoSearchTool:
             if hash_key in self.lsh_index[layer]:
                 candidates.update(self.lsh_index[layer][hash_key])
                 overall_candidates += len(self.lsh_index[layer][hash_key])
-        
+        # Compute similarity scores for candidates
         similarity_scores = [
             (video_id, self.euclidean_distance(query_features, self.video_features[video_id]))
             for video_id in candidates
         ]
 
-        similarity_scores.sort(key=lambda x: x[1])
+        similarity_scores.sort(key=lambda x: x[1]) # Sort by distance
         
-        top_videos = similarity_scores[:t]
+        top_videos = similarity_scores[:t] # Retrieve top t videos
 
         print(f"Unique Candidates: {len(candidates)}")
         print(f"Overall Candidates: {overall_candidates}")
@@ -151,6 +155,7 @@ class VideoSearchTool:
         
         self.display_thumbnails_grid(top_videos)
     
+    #display the thumbnails for the searched similar videos
     def display_thumbnails_grid(self, top_videos):
         num_videos = len(top_videos)
         cols = 4
