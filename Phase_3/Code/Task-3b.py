@@ -39,14 +39,14 @@ class VideoSearchTool:
         
         conn.close()
         raw_features = np.array(raw_features)
-        reduced_features = self.apply_dimensionality_reduction(raw_features)
+        reduced_features = self.apply_dimensionality_reduction(raw_features, self.dimensionality_reduction)
 
         for video_id, feature_vector in zip(video_ids, reduced_features):
             self.video_features[video_id] = feature_vector
             self.add_to_lsh(video_id, feature_vector)
 
-    def apply_dimensionality_reduction(self, data, method='PCA'):
-        if method=='PCA':
+    def apply_dimensionality_reduction(self, data, dimensionality_reduction):
+        if dimensionality_reduction=='PCA':
             row, column = data.shape
             latent_count = min(256, column)
             cov_matrix = np.cov(data, rowvar=False)
@@ -54,32 +54,32 @@ class VideoSearchTool:
             sorted_indices = np.argsort(eigenvalues)[::-1]
             eigenvectors_subset = eigenvectors[:, sorted_indices[:latent_count]]
             return np.dot(data, eigenvectors_subset)
-        elif method=='SVD':
-                DtD = np.dot(data.T, data)
+        elif dimensionality_reduction=='SVD':
+            DtD = np.dot(data.T, data)
 
-                # Calculate eigenvalues and eigenvectors for D^T D
-                eigenvalues_V, V = np.linalg.eigh(DtD)
-
-                # Sort the eigenvalues to get the top latent semantics
-                sorted_indices = np.argsort(eigenvalues_V)[::-1]
-                eigenvalues_V = eigenvalues_V[sorted_indices]
-                V = V[:, sorted_indices]
+            # Calculate eigenvalues and eigenvectors for D^T D
+            eigenvalues_V, V = np.linalg.eigh(DtD)
+            latent_count = 256
+            # Sort the eigenvalues to get the top latent semantics
+            sorted_indices = np.argsort(eigenvalues_V)[::-1]
+            eigenvalues_V = eigenvalues_V[sorted_indices]
+            V = V[:, sorted_indices]
                 
-                V_subset = V[:, :latent_count]
+            V_subset = V[:, :latent_count]
 
-                # Data in Reduced Dimensional space
-                svd_data = np.dot(data, V_subset)
+            # Data in Reduced Dimensional space
+            svd_data = np.dot(data, V_subset)
 
-                return svd_data
-        elif method=="KMeans":
+            return svd_data
+        
+        else:
+            latent_count = 256
             kmeans = KMeans(n_clusters=latent_count, random_state=42)
             kmeans.fit(data)
-
+            
             # Get the Cluster Centers
             cluster_centers = kmeans.cluster_centers_
-
             latent_model = cdist(data, cluster_centers, 'euclidean')
-
             return latent_model
     
     def add_to_lsh(self, video_id, feature_vector):
@@ -157,7 +157,7 @@ class VideoSearchTool:
         plt.show()
 
 def main():
-    db_path = "Phase_3.db"
+    db_path = "../Database/Phase_3.db"
     latent_model = int(input("Please provide the input for 1 - Layer3 + PCA, 2 - Avgpool + SVD, 3 - KMeans + HOG: "))
     #feature_column = int(input("Enter the feature column to use: "))
     thumbnail_dir = "database/thumbnails"
