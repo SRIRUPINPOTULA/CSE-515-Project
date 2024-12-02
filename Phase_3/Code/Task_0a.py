@@ -63,7 +63,7 @@ def main():
     # Save maximum inherent dimensionality to use when looking at entire Feature Space
     inherent_dimensionality_map['max'] = max(inherent_dimensionality_map.values())
 
-    with open(f'../Database/inherent_dim_map_{Service.all_feature_space_map[feature_space]}.json', 'w') as json_file:
+    with open(f'../Outputs/inherent_dim_map_{Service.all_feature_space_map[feature_space]}.json', 'w') as json_file:
         json.dump(inherent_dimensionality_map, json_file)
 
 
