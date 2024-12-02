@@ -22,23 +22,39 @@ class VideoSearchTool:
         cursor = conn.cursor()
         
         query = f"SELECT videoID, {self.feature_column} FROM data"
-        for row in cursor.execute(query):         #Load video features from the database.
+        raw_features = []
+        video_ids = []
+        
+        for row in cursor.execute(query):
             videoID, feature_data = row
-            feature_vector = np.array(json.loads(feature_data)) 
-            self.video_features[videoID] = feature_vector
-            
-            self.add_to_lsh(videoID, feature_vector)
+            feature_vector = np.array(json.loads(feature_data))
+            raw_features.append(feature_vector)
+            video_ids.append(videoID)
         
         conn.close()
+        raw_features = np.array(raw_features)
+        reduced_features = self.apply_dimensionality_reduction(raw_features)
+
+        for video_id, feature_vector in zip(video_ids, reduced_features):
+            self.video_features[video_id] = feature_vector
+            self.add_to_lsh(video_id, feature_vector)
+
+    def apply_dimensionality_reduction(self, data, method='PCA'):
+        row, column = data.shape
+        latent_count = min(256, column)
+        cov_matrix = np.cov(data, rowvar=False)
+        eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+        sorted_indices = np.argsort(eigenvalues)[::-1]
+        eigenvectors_subset = eigenvectors[:, sorted_indices[:latent_count]]
+        return np.dot(data, eigenvectors_subset)
     
     def add_to_lsh(self, video_id, feature_vector):
-       #Hash the feature vector and store in the LSH index.
         for layer in range(self.num_layers):
             rp = np.random.randn(self.hashes_per_layer, feature_vector.shape[0])
             biases = np.random.uniform(0, self.w, size=self.hashes_per_layer)
             
             hash_key = tuple(
-                int(np.floor((np.dot(feature_vector, hyperplane) + bias) / self.w)) # Hashing function defined by us.
+                int(np.floor((np.dot(feature_vector, hyperplane) + bias) / self.w))
                 for hyperplane, bias in zip(rp, biases)
             )
             
@@ -85,7 +101,7 @@ class VideoSearchTool:
     
     def display_thumbnails_grid(self, top_videos):
         num_videos = len(top_videos)
-        cols = 3  # Display 3 thumbnails per row
+        cols = 4
         rows = (num_videos + cols - 1) // cols
 
         fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
@@ -106,11 +122,10 @@ class VideoSearchTool:
         plt.tight_layout()
         plt.show()
 
-
 def main():
-    db_path = "Phase_2(1).db"
-    feature_column = input("Enter the feature column to use (e.g., AvgPool, Layer_3): ")
-    thumbnail_dir = "databsae/thumbnails"
+    db_path = "Phase_3.db"
+    feature_column = input("Enter the feature column to use: ")
+    thumbnail_dir = "database/thumbnails"
     num_layers = 3
     hashes_per_layer = 5
     w = 10
