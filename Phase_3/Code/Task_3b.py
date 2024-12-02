@@ -27,13 +27,13 @@ class VideoSearchTool:
         
         feature_column = self.Feature_Space_Map[self.feature_column]
         query = f"SELECT videoID, {self.Feature_Space_Map[self.feature_column]} FROM data"
-        print("The query is: ", query)
+        #print("The query is: ", query)
         raw_features = []
         video_ids = []
         
         for row in cursor.execute(query):
             videoID, feature_data = row
-            if feature_column in [1, 3]:
+            if feature_column in ["Layer_3", "AvgPool"]:
                 feature_vector = np.array(json.loads(feature_data))
             else:
                 feature_data = feature_data.strip("[]").split()
@@ -111,12 +111,14 @@ class VideoSearchTool:
             if hash_key not in self.lsh_index[layer]:
                 self.lsh_index[layer][hash_key] = []
             self.lsh_index[layer][hash_key].append(video_id)
+        #print(f"Layer {layer} LSH index size: {len(self.lsh_index[layer])}")
     
     def euclidean_distance(self, vec1, vec2):
         return np.linalg.norm(vec1 - vec2)
 
     def search(self, query_video_id, t):
         query_features = self.video_features[query_video_id]
+        print("THe query features are: ", query_features)
         candidates = set()
         overall_candidates = 0
         
