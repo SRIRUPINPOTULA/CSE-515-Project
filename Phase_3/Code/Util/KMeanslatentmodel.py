@@ -1,10 +1,8 @@
-import json
+import numpy as np
 from sklearn.cluster import KMeans
 import sqlite3
-import csv
-import numpy as np
 
-connection = sqlite3.connect('../database/Phase_3.db')
+connection = sqlite3.connect('../Database/Phase_3.db')
 c = connection.cursor()
 
 target_label_range = {}

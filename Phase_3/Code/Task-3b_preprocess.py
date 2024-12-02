@@ -28,6 +28,6 @@ def extract_and_save_thumbnails(json_path, folder1, folder2, output_folder):
 json_path = "videoID.json"
 folder1 = "../target_videos"
 folder2 = "../non-target_videos"
-output_folder = "database/thumbnails"
+output_folder = "Database/thumbnails"
 
 extract_and_save_thumbnails(json_path, folder1, folder2, output_folder)

@@ -4,11 +4,12 @@ import sqlite3
 
 from Util.PCA import PCA
 from Util.SVD import SVD
+from Util.KMeans import kMeans
 
 class ServiceClass():
 
     # Establish connection to the database
-    connection = sqlite3.connect('../database/Phase_3.db')
+    connection = sqlite3.connect('../Database/Phase_3.db')
     c = connection.cursor()
 
     target_labels = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
@@ -16,6 +17,7 @@ class ServiceClass():
                     'jump', 'situp', 'chew', 'kick', 'smile', 'clap', 'kick_ball', 'smoke',
                     'climb', 'somersault', 'climb_stairs', 'laugh', 'stand']
     
+    all_feature_space_map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
     feature_space_map = {1: "Layer_3", 2: "AvgPool", 3: "BOF_HOG"}
     dimensionality_reduction_map = {1: "PCA", 2: "SVD", 3: "KMeans"}
 
@@ -40,8 +42,10 @@ class ServiceClass():
         elif (latent_space == 2) :
             dim_reduced_array = SVD(fs_data, s)
         else:
-            # TODO: Integrate KMeans
-            print("KMeans")
+            # Kmeans does not allow more clusters than the number of samples
+            if (s > len(fs_data)):
+                s = len(fs_data)
+            dim_reduced_array = kMeans(fs_data, s)
 
         return dim_reduced_array
     
