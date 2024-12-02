@@ -33,12 +33,28 @@ class VideoSearchTool:
         
         for row in cursor.execute(query):
             videoID, feature_data = row
-            feature_vector = np.array(json.loads(feature_data))
+            if feature_column in [1, 3]:
+                feature_vector = np.array(json.loads(feature_data))
+            else:
+                feature_data = feature_data.strip("[]").split()
+                feature_vector = np.array(feature_data, dtype=int)
             raw_features.append(feature_vector)
             video_ids.append(videoID)
         
         conn.close()
-        raw_features = np.array(raw_features)
+
+        processed_arrays = []
+        for arr in raw_features:
+            if len(arr) < 480:
+                padded_arr = np.pad(arr, (0, 480 - len(arr)), mode='constant', constant_values=0)
+            elif len(arr) > 480:
+                padded_arr = arr[:480]
+            else:
+                padded_arr = arr
+            
+            processed_arrays.append(padded_arr)
+
+        raw_features = np.array(processed_arrays)
         reduced_features = self.apply_dimensionality_reduction(raw_features, self.dimensionality_reduction)
 
         for video_id, feature_vector in zip(video_ids, reduced_features):
