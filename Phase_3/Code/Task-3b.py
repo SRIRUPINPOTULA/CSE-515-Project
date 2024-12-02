@@ -4,6 +4,8 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
 
 class VideoSearchTool:
     def __init__(self, db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, dimensionality_reduction, Feature_Space_Map):
@@ -53,9 +55,32 @@ class VideoSearchTool:
             eigenvectors_subset = eigenvectors[:, sorted_indices[:latent_count]]
             return np.dot(data, eigenvectors_subset)
         elif method=='SVD':
-            return
-        else:
-            return
+                DtD = np.dot(data.T, data)
+
+                # Calculate eigenvalues and eigenvectors for D^T D
+                eigenvalues_V, V = np.linalg.eigh(DtD)
+
+                # Sort the eigenvalues to get the top latent semantics
+                sorted_indices = np.argsort(eigenvalues_V)[::-1]
+                eigenvalues_V = eigenvalues_V[sorted_indices]
+                V = V[:, sorted_indices]
+                
+                V_subset = V[:, :latent_count]
+
+                # Data in Reduced Dimensional space
+                svd_data = np.dot(data, V_subset)
+
+                return svd_data
+        elif method=="KMeans":
+            kmeans = KMeans(n_clusters=latent_count, random_state=42)
+            kmeans.fit(data)
+
+            # Get the Cluster Centers
+            cluster_centers = kmeans.cluster_centers_
+
+            latent_model = cdist(data, cluster_centers, 'euclidean')
+
+            return latent_model
     
     def add_to_lsh(self, video_id, feature_vector):
         for layer in range(self.num_layers):
@@ -132,10 +157,10 @@ class VideoSearchTool:
         plt.show()
 
 def main():
-    db_path = "../Database/Phase_3.db"
+    db_path = "Phase_3.db"
     latent_model = int(input("Please provide the input for 1 - Layer3 + PCA, 2 - Avgpool + SVD, 3 - KMeans + HOG: "))
     #feature_column = int(input("Enter the feature column to use: "))
-    thumbnail_dir = "../Database/thumbnails"
+    thumbnail_dir = "database/thumbnails"
     num_layers = 3
     hashes_per_layer = 5
     Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
@@ -143,13 +168,12 @@ def main():
     if latent_model == 1:
         feature_column = 1
         video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "PCA", Feature_Space_Map)
-    elif latent_model == 1:
+    elif latent_model == 2:
         feature_column = 3
         video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "SVD", Feature_Space_Map)
-    else:
+    elif latent_model==3:
         feature_column = 4
         video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "KMeans", Feature_Space_Map)
-    
     query_video_id = int(input("Enter the query videoID: "))
     t = int(input("Enter the number of similar videos to retrieve: "))
     
