@@ -18,7 +18,7 @@ def get_latent_space(latent_space):
     video_names_map = {}
     
     # Get the inherent dimensionality for each label from Task 0a
-    with open(f'../Database/inherent_dim_map_{Service.feature_space_map[latent_space]}.json', 'r') as file:
+    with open(f'../Outputs/inherent_dim_map_{Service.feature_space_map[latent_space]}.json', 'r') as file:
         inherent_dim_map = json.load(file)
 
     for label in Service.target_labels:
