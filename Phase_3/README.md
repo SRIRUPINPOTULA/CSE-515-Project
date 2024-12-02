@@ -1,7 +1,7 @@
-# CSE 515 Phase 2 - Group 5
+# CSE 515 Phase 3 - Group 5a
 
 # Directory Structure:
-The Phase-2 directory consists of the following directories
+The Phase-3 directory consists of the following directories
 
 ```plaintext
 Phase_3/
