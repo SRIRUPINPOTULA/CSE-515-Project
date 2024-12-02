@@ -139,9 +139,9 @@ def main():
         #Visualise using MDS and Group of label clusters
         input_visualization = int(input("Please provide the visualization technique 1 - MDS, 2 - Group of Clusters: "))
         if input_visualization == 1:
-            visualize_clusters(features, labels, 3, k=len(centroids))
+            visualize_clusters(features, labels, 1, k=len(centroids))
         else:
-            helper_visualise(features, labels, k, centroids, target_label_range, 3)
+            helper_visualise(features, labels, k, centroids, target_label_range, 1)
     elif latent_model ==2:
         #Gather the target label range and the latent model
         latent_model, target_label_range =  SVD(3)
@@ -163,7 +163,7 @@ def main():
         #Visualise using MDS and Group of label clusters
         input_visualization = int(input("Please provide the visualization technique 1 - MDS, 2 - Group of Clusters: "))
         if input_visualization == 1:
-            visualize_clusters(features, labels, 1,k=len(centroids))
+            visualize_clusters(features, labels, 3,k=len(centroids))
         else:
-            helper_visualise(features, labels, k, centroids, target_label_range, 1)
+            helper_visualise(features, labels, k, centroids, target_label_range, 3)
 main()
