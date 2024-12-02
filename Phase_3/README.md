@@ -13,16 +13,13 @@ Phase_3/
 │
 ├── Database/                   # Contains the db and json files
 │
-└── Report/                     # Contains the report for Phase-2
+└── Report/                     # Contains the report for Phase-3
 ```
 
 ## 1. Code:
 This directory consists of all the tasks' codes, including preprocessing and actual tasks.
 
 ### Util:
-
-This Directory Consists of the corrected phase-1 code. 
-
 
 KMeans.py: The python file consists of implementation code for KMeans, used as part of Task-1,2,3.
 
