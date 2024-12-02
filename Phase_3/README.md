@@ -4,29 +4,14 @@
 The Phase-2 directory consists of the following directories
 
 ```plaintext
-Phase_2/
+Phase_3/
 │
 ├── README.md                   # Project Overview (this file)
 │
-├── Code/                       # Source Code for Phase 2
-│   └── Util/                   # Source Code to assist Phase 2
+├── Code/                       # Source Code for Phase 3
+│   └── Util/                   # Source Code to assist Phase 3
 │
-├── database/                   # Contains the db and json files
-│
-├── dataset/                    # Contains the video data split as target and non target
-│   ├── non_target_videos/
-│   └── target_videos/
-│
-├── dataset_stips/              # Contains the video STIPs data split as target and non target
-│   ├── non_target_videos/
-│   └── target_videos/
-│
-├── hmdb51_org/                 # Contains all the original data videos
-│
-├── hmdb51_org_stips/           # Contains all the original videos STIPs data
-│
-├── Outputs/                    # Contains all the required Outputs from the Tasks
-│   └── Task_2/
+├── Database/                   # Contains the db and json files
 │
 └── Report/                     # Contains the report for Phase-2
 ```
@@ -38,67 +23,43 @@ This directory consists of all the tasks' codes, including preprocessing and act
 
 This Directory Consists of the corrected phase-1 code. 
 
-Task_1.py: This is the phase-1 task1 code that has functions to extract the features from layer3, layer4, avgpool.
 
-Task_2.py: This is the phase-1 task2 code that has functions to extract the HoG and HoF features.
-
-KMeans.py: The python file consists of implementation code for KMeans, used as part of Task-2,3,4.
+KMeans.py: The python file consists of implementation code for KMeans, used as part of Task-1,2,3.
 
 LDA.py: The python file consists of the LDA implementation that is part of Task-2.
 
-PCA.py: The python file consists implementation of PCA that is used as part of Task-2,3,4.
+PCA.py: The python file consists implementation of PCA that is used as part of Task-1,2,3.
 
-SVD.py: The python file consists implementation of PCA that is used as part of Task-2,3,4.
+SVD.py: The python file consists implementation of PCA that is used as part of Task-1,2,3.
 
-Visualize.py: This file contains the implementation of color histograms using HoG and HoF.
+KMeanslatentmodel.py: The python file consists implementation that gathers all the features of target video and used for calculation of latent models which are used for Task-1b.
 
-### Task-0:
+services.py: This file contains the implementation to extract the features and reduce to latent models.
 
-Task_0a.py: Consists code to map the videoID, and extracts all the features.
+### Task-0a:
 
-Task_0b.py: Implements a program to visualize the m most similar videos.
+Task_0a.py: Consists code to find the inherent dimensionality.
 
 ### Task-1:
 
-Task_1_preprocess.py: The values are stored in JSON for each category label this being a preprocessing step.
+Task_1a.py: Implementation of Spectral Clustering.
 
-Task_1.py: The implementation code that lists 'l' most similar labels.
+Task_1b.py: Consists of code to implement KMeans clustering
 
 ### Task-2:
 
-Task_2.py: Consists that code that implements all the latent features.
+Task_2.py: Consists that code that implements `KNN` and `SVM` classifiers.
 
 ### Task-3: 
 
-Task_3.py: Consists of code that implement finds the m similar videos from the latent features and feature spaces.
+Task_3a.py: Consists of code that implements LSH for the given input.
 
-### Task-4:
+Task-3b_preprocess.py: Consists of code that implements the thumbnails.
 
-Task_4.py: Consists of code that list `m` similar videos from the latent semantics.
-
-### Task-5:
-
-Task_5.py: Incorrect implementation.
-
-### Task-6:
-
-Task_6.py: Incorrect implementation.
+Task_3b.py: Consists of code that implements LSH for all the videos
 
 ## 2. Database:
-This directory consists of all the json files that are stored as part of all the tasks.
-
-## 3. Dataset:
-This directory consists of two more directories which are target_videos and non_target_videos.
-
-## 4. Dataset Stips:
-This directory contains the video STIPs files split into two directories, target_videos and non_target_videos.
-
-## 5. hmdb51_org:
-
-This directory contains all the original data videos of each category label.
-
-## 6. hmdb51_org_stips:
-This directory contains all the original videos STIPs data.
+This directory consists of all the json files that are stored as part of all the tasks and the database.
 
 <br>
 <br>
@@ -112,30 +73,29 @@ This directory contains all the original videos STIPs data.
 2. Install the required dependencies:
 > `pip install -r requirements.txt`
 
-3. Run Task 0a only on first time setup:
-> `python Code/Task_0a.py`
-
-4. Run the Source Code from `Code` directory in order:
+3. Run the Source Code from `Code` directory in order:
 > `cd Code`
 >
-> `python Task_0b.py`
+> `python Task_0a.py`
 >
-> `python Task_1_preprocess.py`
+> `python Task_1a.py`
+>
+> `python Task_1b.py`
 > 
-> `python Task_1.py`
->
 > `python Task_2.py`
 >
-> `python Task_3.py`
+> `python Task-3a.py`
 >
-> `python Task_4.py`
+> `python Task-3b_preprocess.py`
+>
+> `python Task-3b.py`
 
 <br>
 
 # Using the SQLite Database
 
 1. Connect to the database from the CLI
-> `sqlite3 database/Phase_2.db`
+> `sqlite3 database/Phase_3.db`
 
 2. List the tables in the db
 > `.tables`
