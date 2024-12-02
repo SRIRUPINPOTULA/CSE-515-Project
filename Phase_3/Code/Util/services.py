@@ -24,17 +24,20 @@ class ServiceClass():
     # Clean the extracted values and make a list of features
     def clean_db_data(rows, latent_space):
         cleaned_data = []
+        video_names = []
         if latent_space in [1, 2]:
             for row in rows:
-                cleaned_data.append(list(map(float, row[0].strip("[]").split(","))))
+                cleaned_data.append(list(map(float, row[1].strip("[]").split(","))))
+                video_names.append(row[0])
         elif latent_space == 3:
             for row in rows:
-                cleaned_data.append(list(map(int, row[0].strip("[]").split())))
+                cleaned_data.append(list(map(int, row[1].strip("[]").split())))
+                video_names.append(row[0])
 
         max_len = max(len(lst) for lst in cleaned_data)
         padded_data = [lst + [0] * (max_len - len(lst)) for lst in cleaned_data]
         fs_data = np.array(padded_data)
-        return fs_data
+        return fs_data, video_names
 
     def get_reduced_dimensions(fs_data, latent_space, s):
         if (latent_space == 1):
@@ -53,8 +56,8 @@ class ServiceClass():
         ServiceClass.c.execute(query)
         rows = ServiceClass.c.fetchall()
 
-        fs_data = ServiceClass.clean_db_data(rows, latent_space)
+        fs_data, video_names = ServiceClass.clean_db_data(rows, latent_space)
 
         data = ServiceClass.get_reduced_dimensions(fs_data, latent_space, s)
 
-        return data
+        return data, video_names

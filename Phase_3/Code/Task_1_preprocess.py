@@ -26,6 +26,6 @@ def extract_and_save_thumbnails(video_directory, output_folder):
     print("Thumbnails saved successfully.")
 
 video_directory = "../hmdb51_org"
-output_folder = "../Database/Thumbnails"
+output_folder = "../Database/Thumbnails_Names"
 
 extract_and_save_thumbnails(video_directory, output_folder)

@@ -5,15 +5,17 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 import json
 
+from sklearn.manifold import MDS
 from sklearn.metrics import pairwise_distances
 import matplotlib.pyplot as plt
-from sklearn.manifold import MDS
+import matplotlib.image as mpimg
 
 from Util.services import ServiceClass as Service
 
 # Get Latent Space for each label
 def get_latent_space(latent_space):
     data_map = {}
+    video_names_map = {}
     
     # Get the inherent dimensionality for each label from Task 0a
     with open(f'../Database/inherent_dim_map_{Service.feature_space_map[latent_space]}.json', 'r') as file:
@@ -23,13 +25,14 @@ def get_latent_space(latent_space):
 
         s = inherent_dim_map[label]
 
-        label_query = f"SELECT {Service.feature_space_map[latent_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label='{label}';"
+        label_query = f"SELECT Video_Name, {Service.feature_space_map[latent_space]} FROM data WHERE videoID % 2 == 0 AND Action_Label='{label}';"
 
-        data = Service.get_data_from_db(label_query, latent_space, s)
+        data, video_names = Service.get_data_from_db(label_query, latent_space, s)
 
         data_map[label] = data
+        video_names_map[label] = video_names
     
-    return data_map
+    return data_map, video_names_map
 
 # Get an initial default trheshold value for each Latent Space
 def get_default_threshold(latent_space):
@@ -190,8 +193,37 @@ def visualize_MDS(data, cluster):
     plt.grid(True)
     plt.show()
 
+# Visualization using Video Thumbnails
+def visualize_thumbnails(video_names, cluster):
+    image_path = "../Database/Thumbnails_Names/"
+    image_format = ".jpg"
+    image_lists = [[image_path + video_names[i] + image_format for i in sublist] for sublist in cluster]
+
+    # Loop through each sublist and create a separate plot for each
+    for index, row in enumerate(image_lists):
+        # Create a new figure for each row
+        plt.figure(figsize=(15, 5))
+        figure_title = f"Cluster {index+1}"
+        plt.suptitle(figure_title, fontsize=16, fontweight='bold', color='black')
+        
+        # Loop through each image in the current row
+        for j, image_path in enumerate(row):
+            img = mpimg.imread(image_path)
+            
+            # Create a subplot for each image in the row
+            ax = plt.subplot(1, len(row), j + 1)
+            ax.imshow(img)
+            ax.axis('off')
+
+            label = (image_path.split('/')[-1])[:-4]
+            ax.text(0.5, 0.05, label, ha='center', va='top', transform=ax.transAxes, color='white', fontsize=8, fontweight='bold')
+        
+        # Display the plot for the current row
+        plt.tight_layout()
+        plt.show(block=False)
+
 # Visualize the clusters until User exits
-def visualize(data, clusters):
+def visualize(data, clusters, video_names):
     while True:
         vis_method = int(input("\nHow would you like to visualize the Clusters: 1- MDS space or 2- Group of Video Thumbnails: "))
 
@@ -210,7 +242,7 @@ def visualize(data, clusters):
                 if vis_method == 1:
                     visualize_MDS(data[label], clusters[label])
                 else:
-                    print(clusters[label])
+                    visualize_thumbnails(video_names[label], clusters[label])
             else:
                 print("Invalid choice")
         
@@ -227,13 +259,13 @@ def main():
     latent_space = int(input("Select a latent space: 1 - layer3 + PCA, 2 - avgpool + SVD, 3 - HOG + KMeans: "))
     sig_clusters = int(input("Select the number of c most significant clusters to be selected: "))
 
-    data = get_latent_space(latent_space)
+    data, video_names = get_latent_space(latent_space)
 
     clusters = {}
     for label in data:
         clusters[label] = get_sign_clusters(data[label], sig_clusters, latent_space)
 
-    visualize(data, clusters)
+    visualize(data, clusters, video_names)
 
 
 if __name__ == "__main__":
