@@ -1,14 +1,17 @@
 # Import the necessary libraries
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+
 import numpy as np
 import json
 
 from sklearn.metrics import pairwise_distances
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from sklearn.manifold import MDS
 
 from Util.services import ServiceClass as Service
 
+# Get Latent Space for each label
 def get_latent_space(latent_space):
     data_map = {}
     
@@ -28,6 +31,7 @@ def get_latent_space(latent_space):
     
     return data_map
 
+# Get an initial default trheshold value for each Latent Space
 def get_default_threshold(latent_space):
     if latent_space == 1:
         return 1
@@ -38,7 +42,8 @@ def get_default_threshold(latent_space):
     else:
         return 1
 
-def get_threshold(threshold, ratio = None):    
+# Change threshold value based on the ratio of clusters in graph to clusters needed by user
+def get_threshold(threshold, ratio = None):
     if ratio == None:
         return threshold
     elif ratio > 1:
@@ -61,11 +66,13 @@ def create_adjacency_matrix(data, threshold):
                     adjacency_matrix[i][j] = 1
     return adjacency_matrix
 
+# Find all the connected components in the graph
 def find_connected_components(adj_matrix):
     n = len(adj_matrix)
     visited = [False] * n
     components = []
 
+    # Depth first search to traverse graph
     def dfs(node, component):
         visited[node] = True
         component.append(node)
@@ -81,8 +88,11 @@ def find_connected_components(adj_matrix):
 
     return components
 
+# Count the number of connected components
+# based on the index of second-smallest eigen value of laplacian matrix
 def get_conn_comp_count(eigenvalues):
     for index in range(len(eigenvalues)):
+        # Eigen value is being computed as a very small number instead of 0
         if eigenvalues[index] < 1e-5:
             continue
         else:
@@ -96,27 +106,30 @@ def partition(adj_matrix, nodes):
         # Laplacian matrix: D - A
         laplacian = degree_matrix - adj_matrix
 
-        # Step 2: Compute eigenvalues and eigenvectors
+        # Compute eigenvalues and eigenvectors
         eigenvalues, eigenvectors = np.linalg.eigh(laplacian)
 
-        # Step 3: Use the Fiedler vector (second smallest eigenvector) for partitioning
+        # Use the Fiedler vector (second smallest eigenvector) for partitioning
         index = get_conn_comp_count(eigenvalues)
         fiedler_vector = eigenvectors[:, index]
 
-        # Step 4: Split nodes based on the sign of the Fiedler vector
+        # Split nodes based on the sign of the Fiedler vector
         positive_set = [nodes[i] for i in range(len(nodes)) if fiedler_vector[i] > 0]
         negative_set = [nodes[i] for i in range(len(nodes)) if fiedler_vector[i] <= 0]
 
         return positive_set, negative_set
 
 def get_sign_clusters(data, num_clusters, latent_space):
+    # Get an initial default threshold value
     default_threshold = get_default_threshold(latent_space)
     threshold = get_threshold(default_threshold)
     adjacency_matrix = create_adjacency_matrix(data, threshold)
 
+    # find all the connected components
     clusters = find_connected_components(adjacency_matrix)
     # print("Initial cluster number: ", len(clusters), "\nInitial clusters: \n", clusters)
 
+    # Compute ratio to modify threshold value
     ratio = len(clusters) / num_clusters
     # print(f"ratio: {ratio}, threshold: {threshold}, num_clusters: {len(clusters)}, clusters_expected: {num_clusters}")
 
@@ -128,6 +141,7 @@ def get_sign_clusters(data, num_clusters, latent_space):
         # print(f"ratio: {ratio}, threshold: {threshold}, num_clusters: {len(clusters)}, clusters_expected: {num_clusters}")
 
     while len(clusters) < num_clusters:
+        # Find Largest Cluster based on CLuster Distance metric
         largest_cluster_idx = np.argmax([len(c) for c in clusters])
         largest_cluster = clusters.pop(largest_cluster_idx)
 
@@ -145,30 +159,38 @@ def get_sign_clusters(data, num_clusters, latent_space):
 
 # Visualization using MDS Space
 def visualize_MDS(data, cluster):
-    # Compute the pairwise distance matrix
-    dist_matrix = pairwise_distances(data, metric='euclidean')
+    # Latent Space 1 and 2 contain complex numbers.
+    real_data = np.hstack((data.real, data.imag))
+    distance_matrix = pairwise_distances(real_data, metric='euclidean')
+
+    # Flatten clusters into a list of indices and assign cluster labels
+    cluster_labels = np.zeros(data.shape[0], dtype=int)
+    for cluster_idx, indices in enumerate(cluster):
+        cluster_labels[indices] = cluster_idx
 
     # Apply MDS to reduce the data to 2D
-    mds = MDS(n_components=2, dissimilarity='precomputed', random_state=0)
-    data_mds = mds.fit_transform(dist_matrix)
-
-    num_clusters = len(cluster)
-    colormap = cm['Spectral']
+    mds = MDS(n_components=2, random_state=42, dissimilarity='precomputed')
+    data_mds = mds.fit_transform(distance_matrix)
 
     # Visualize the data using clusters
     plt.figure(figsize=(10, 8))
 
-    for cluster_idx, cluster in enumerate(cluster):
-        cluster_points = data_mds[cluster]
-        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], 
+    # Use colormap to represent upto 20 clusters
+    colors = plt.colormaps['tab20'](np.linspace(0, 1, len(cluster)))
+
+    for cluster_idx, color in enumerate(colors):
+        cluster_points = data_mds[cluster_labels == cluster_idx]
+        plt.scatter(cluster_points[:, 0],
+                    cluster_points[:, 1], 
                     label=f'Cluster {cluster_idx+1}', 
-                    cmap=colormap)
+                    color=color)
 
     plt.legend()
     plt.title("Cluster Visualization in 2D MDS Space")
     plt.grid(True)
     plt.show()
 
+# Visualize the clusters until User exits
 def visualize(data, clusters):
     while True:
         vis_method = int(input("\nHow would you like to visualize the Clusters: 1- MDS space or 2- Group of Video Thumbnails: "))

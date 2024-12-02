@@ -1,6 +1,3 @@
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
-
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
 
