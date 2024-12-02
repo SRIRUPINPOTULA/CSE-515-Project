@@ -6,12 +6,14 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 class VideoSearchTool:
-    def __init__(self, db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir):
+    def __init__(self, db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, dimensionality_reduction, Feature_Space_Map):
         self.db_path = db_path
         self.feature_column = feature_column
+        self.dimensionality_reduction = dimensionality_reduction
         self.num_layers = num_layers
         self.hashes_per_layer = hashes_per_layer
         self.w = w
+        self.Feature_Space_Map = Feature_Space_Map
         self.thumbnail_dir = thumbnail_dir
         self.lsh_index = {layer: {} for layer in range(num_layers)}
         self.video_features = {}
@@ -21,7 +23,9 @@ class VideoSearchTool:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        query = f"SELECT videoID, {self.feature_column} FROM data"
+        feature_column = self.Feature_Space_Map[self.feature_column]
+        query = f"SELECT videoID, {self.Feature_Space_Map[self.feature_column]} FROM data"
+        print("The query is: ", query)
         raw_features = []
         video_ids = []
         
@@ -40,13 +44,18 @@ class VideoSearchTool:
             self.add_to_lsh(video_id, feature_vector)
 
     def apply_dimensionality_reduction(self, data, method='PCA'):
-        row, column = data.shape
-        latent_count = min(256, column)
-        cov_matrix = np.cov(data, rowvar=False)
-        eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
-        sorted_indices = np.argsort(eigenvalues)[::-1]
-        eigenvectors_subset = eigenvectors[:, sorted_indices[:latent_count]]
-        return np.dot(data, eigenvectors_subset)
+        if method=='PCA':
+            row, column = data.shape
+            latent_count = min(256, column)
+            cov_matrix = np.cov(data, rowvar=False)
+            eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+            sorted_indices = np.argsort(eigenvalues)[::-1]
+            eigenvectors_subset = eigenvectors[:, sorted_indices[:latent_count]]
+            return np.dot(data, eigenvectors_subset)
+        elif method=='SVD':
+            return
+        else:
+            return
     
     def add_to_lsh(self, video_id, feature_vector):
         for layer in range(self.num_layers):
@@ -123,14 +132,23 @@ class VideoSearchTool:
         plt.show()
 
 def main():
-    db_path = "Phase_3.db"
-    feature_column = input("Enter the feature column to use: ")
-    thumbnail_dir = "database/thumbnails"
+    db_path = "../Database/Phase_3.db"
+    latent_model = int(input("Please provide the input for 1 - Layer3 + PCA, 2 - Avgpool + SVD, 3 - KMeans + HOG: "))
+    #feature_column = int(input("Enter the feature column to use: "))
+    thumbnail_dir = "../Database/thumbnails"
     num_layers = 3
     hashes_per_layer = 5
+    Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
     w = 10
-    
-    video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir)
+    if latent_model == 1:
+        feature_column = 1
+        video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "PCA", Feature_Space_Map)
+    elif latent_model == 1:
+        feature_column = 3
+        video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "SVD", Feature_Space_Map)
+    else:
+        feature_column = 4
+        video_search = VideoSearchTool(db_path, feature_column, num_layers, hashes_per_layer, w, thumbnail_dir, "KMeans", Feature_Space_Map)
     
     query_video_id = int(input("Enter the query videoID: "))
     t = int(input("Enter the number of similar videos to retrieve: "))

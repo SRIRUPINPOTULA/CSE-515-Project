@@ -153,7 +153,7 @@ def PCA(feature_space, query_feature, classifier, k, m):
         predicted_class = predict_one_vs_rest_svm(query_feature, models, m)
         predicted_class = [str(cls) for cls in predicted_class]
         for i in range(len(predicted_class)):
-            print("The predicted the m labels are: ", predicted_class[i])
+            print("The predicted m labels are: ", predicted_class[i])
             labels_predicted.append(predicted_class[i])
     return labels_predicted
             
@@ -215,7 +215,7 @@ def SVD(feature_space, query_feature, classifier, k, m):
         predicted_class = predict_one_vs_rest_svm(query_feature, models, m)
         predicted_class = [str(cls) for cls in predicted_class]
         for i in range(len(predicted_class)):
-            print("The predicted the m labels are: ", predicted_class[i])
+            print("The predicted m labels are: ", predicted_class[i])
             labels_predicted.append(predicted_class[i])
     return labels_predicted
 
@@ -242,7 +242,7 @@ def KNN_classifier(data, target_label_range, query_feature, k, m):
         m = min(m, k)
     #Predict m labels
     for i in range(0, m):
-        print("The predicted the m labels are: ", labels_predicted[i])
+        print("The predicted m labels are: ", labels_predicted[i])
     return labels_predicted
 
 #Implementaiton of KMeans
@@ -290,7 +290,7 @@ def gather_features(feature_space, query_feature, classifier, k, m):
         predicted_class = predict_one_vs_rest_svm(query_feature, models, m)
         predicted_class = [str(cls) for cls in predicted_class]
         for i in range(len(predicted_class)):
-            print("The predicted the m labels are: ", predicted_class[i])
+            print("The predicted m labels are: ", predicted_class[i])
     return predicted_class
 
 #main function that gatheres the latent model and videoID
