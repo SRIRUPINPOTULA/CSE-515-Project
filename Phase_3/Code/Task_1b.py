@@ -1,14 +1,11 @@
-#Import all the necessary libraries
-from Util.KMeanslatentmodel import latent_model_generator
-from Util.KMeanslatentmodel import PCA
-from Util.KMeanslatentmodel import SVD
+# Import all the necessary libraries
 import numpy as np
-import sqlite3
-import json
 import matplotlib.pyplot as plt
 from sklearn.manifold import MDS
 from collections import Counter
 import mplcursors
+
+from Util.KMeanslatentmodel import latent_model_generator, PCA, SVD
 
 #Select the videos from target labels
 target_videos = ['golf',  'shoot_ball', 'brush_hair', 'handstand', 'shoot_bow', 
@@ -166,4 +163,6 @@ def main():
             visualize_clusters(features, labels, 3,k=len(centroids))
         else:
             helper_visualise(features, labels, k, centroids, target_label_range, 3)
+
+
 main()

@@ -1,14 +1,7 @@
 # Basic Python libraries
-python
 opencv-python
-torch
-torchvision
-gensim
-nltk
+numpy
 scikit-learn
 matplotlib
-numpy
-prettytable
-sqlite 
-pandas
+mplcursors
 scipy

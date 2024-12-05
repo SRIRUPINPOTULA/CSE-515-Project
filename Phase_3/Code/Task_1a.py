@@ -9,6 +9,7 @@ from sklearn.manifold import MDS
 from sklearn.metrics import pairwise_distances
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import math
 
 from Util.services import ServiceClass as Service
 
@@ -201,17 +202,21 @@ def visualize_thumbnails(video_names, cluster):
 
     # Loop through each sublist and create a separate plot for each
     for index, row in enumerate(image_lists):
-        # Create a new figure for each row
-        plt.figure(figsize=(15, 5))
+        num_images = len(row)
+        cols = min(5, num_images)  # Maximum 5 images per row for readability
+        rows = math.ceil(num_images / cols)  # Calculate number of rows dynamically
+
+        # Create a new figure for each cluster
+        plt.figure(figsize=(6 * cols, 6 * rows))
         figure_title = f"Cluster {index+1}"
         plt.suptitle(figure_title, fontsize=16, fontweight='bold', color='black')
         
-        # Loop through each image in the current row
+        # Loop through each image in the current cluster
         for j, image_path in enumerate(row):
             img = mpimg.imread(image_path)
             
-            # Create a subplot for each image in the row
-            ax = plt.subplot(1, len(row), j + 1)
+            # Create a subplot for each image
+            ax = plt.subplot(rows, cols, j + 1)
             ax.imshow(img)
             ax.axis('off')
 
@@ -219,7 +224,7 @@ def visualize_thumbnails(video_names, cluster):
             ax.text(0.5, 0.05, label, ha='center', va='top', transform=ax.transAxes, color='white', fontsize=8, fontweight='bold')
         
         # Display the plot for the current row
-        plt.tight_layout()
+        plt.tight_layout(pad=0.2)
         plt.show(block=False)
 
 # Visualize the clusters until User exits
