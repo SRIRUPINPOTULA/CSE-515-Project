@@ -1,11 +1,11 @@
-import json
-from Util.KMeanslatentmodel import KMeans_implementation
-from Util.KMeanslatentmodel import PCA
-from Util.KMeanslatentmodel import SVD
-import sqlite3
-import csv
+# Import all the necessary libraries
 import numpy as np
 
+import sqlite3
+
+from Util.KMeanslatentmodel import KMeans_implementation
+
+# Establish connection to the database
 connection = sqlite3.connect('../Database/Phase_3.db')
 c = connection.cursor()
 
@@ -251,14 +251,16 @@ def gather_features(feature_space, query_feature, classifier, k, m):
     Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF"}
     cleaned_data = []
     initial = 0
-    for i in range(0, len(video_labels)):
+    for action in video_labels:
         #Gather all the video for the video labels
-        action = video_labels[i]
         retrieval_query = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE All_Label == '{action}';"
+        
         c.execute(retrieval_query)
         rows = c.fetchall()
+        
         for row in rows:
             cleaned_data.append(list(map(int, row[0].strip("[]").split())))
+        
         target_label_range[action]= [initial, len(cleaned_data)-1]
         initial = len(cleaned_data)
     #If the size is less than 480 then append zero.
@@ -297,41 +299,49 @@ def gather_features(feature_space, query_feature, classifier, k, m):
 def main():
     #Gather the videoID
     video_number = int(input("Provide the  VideoID: "))
+
     #If the videoID is even end the execution
     if video_number%2==0:
         print("Please provide odd number for video id.")
         return
+    
     #Provide the classifier KNN, SVM
-    classifier = int(input("Provide the  classifier 1 - KNN, 2 - SVM: "))
+    classifier = int(input("Provide the classifier 1 - KNN, 2 - SVM: "))
     #Gather the latent model
     latent_model = int(input("Please provide the input for 1 - Layer3 + PCA, 2 - Avgpool + SVD, 3 - KMeans + HOG: "))
     #Value of m to predict target label
     m = int(input("Provide the value for m : "))
+    
     #If classifier is knn gather the value of k
     if classifier==1:
         k = int(input("Provide the value for k : "))
     else:
         k = 0
+
+    Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF: "}
     #Depending on latent model predict m labels
     if latent_model == 3:
-        Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF: "}
         feature_space = 4
         #Gather the feature for the given videoID
         query_feature = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID = {video_number};"
+
         c.execute(query_feature)
         result = c.fetchone()
-        result = result[0]
-        cleaned_data = result.replace('[', '').replace(']', '').replace('\n', '').strip()
+
+        cleaned_data = result[0].replace('[', '').replace(']', '').replace('\n', '').strip()
         query_feature = list(map(int, cleaned_data.split()))
         if len(query_feature) < 480:
             zeros_to_add = 480 - len(query_feature)
             query_feature.extend([0] * zeros_to_add)
         results = gather_features(feature_space, query_feature, classifier, k, m)
+
+
         true_label = f"SELECT All_label FROM data WHERE videoID = {video_number};"
+        
         c.execute(true_label)
         result = c.fetchone()
-        result = result[0]
-        if result in target_videos:
+        
+        if result[0] in target_videos:
             if result in results:
                 index = results.index(result)
                 formula = (m - index + 1 + 1)/m 
@@ -339,21 +349,22 @@ def main():
             else:
                 print("The per-classifier accuracy value is zero")
     elif latent_model == 2:
-        Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF: "}
         feature_space = 3
         #Gather the feature for the given videoID
         query_feature = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID = {video_number};"
+
         c.execute(query_feature)
         result = c.fetchone()
-        result = result[0]
-        cleaned_data = result.replace('[', '').replace(']', '').replace('\n', '').strip()
+        
+        cleaned_data = result[0].replace('[', '').replace(']', '').replace('\n', '').strip()
         query_feature = list(map(float, cleaned_data.strip("[]").split(",")))
         results = SVD(feature_space, query_feature, classifier, k, m)
+        
         true_label = f"SELECT All_label FROM data WHERE videoID = {video_number};"
+        
         c.execute(true_label)
         result = c.fetchone()
-        result = result[0]
-        if result in target_videos:
+        if result[0] in target_videos:
             if result in results:
                 index = results.index(result)
                 formula = (m - index + 1 + 1)/m 
@@ -361,25 +372,28 @@ def main():
             else:
                 print("The per-classifier accuracy value is zero")
     else:
-        Feature_Space_Map = {1: "Layer_3", 2: "Layer_4", 3: "AvgPool", 4: "BOF_HOG", 5: "BOF_HOF: "}
         feature_space = 1
         #Gather the feature for the given videoID
         query_feature = f"SELECT {Feature_Space_Map[feature_space]} FROM data WHERE videoID = {video_number};"
+
         c.execute(query_feature)
+        
         result = c.fetchone()
-        result = result[0]
-        cleaned_data = result.replace('[', '').replace(']', '').replace('\n', '').strip()
+        cleaned_data = result[0].replace('[', '').replace(']', '').replace('\n', '').strip()
         query_feature = list(map(float, cleaned_data.strip("[]").split(",")))
         results = PCA(feature_space, query_feature, classifier, k, m)
+        
         true_label = f"SELECT All_label FROM data WHERE videoID = {video_number};"
+        
         c.execute(true_label)
         result = c.fetchone()
-        result = result[0]
-        if result in target_videos:
+        if result[0] in target_videos:
             if result in results:
                 index = results.index(result)
                 formula = (m - index + 1 + 1)/m 
                 print("Per-classifier accuracy value is: ", formula)
             else:
                 print("The per-classifier accuracy value is zero")
+
+
 main()
