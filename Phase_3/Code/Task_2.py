@@ -342,8 +342,8 @@ def main():
         result = c.fetchone()
         
         if result[0] in target_videos:
-            if result in results:
-                index = results.index(result)
+            if result[0] in results:
+                index = results.index(result[0])
                 formula = (m - index + 1 + 1)/m 
                 print("Per-classifier accuracy value is: ", formula)
             else:
@@ -365,8 +365,8 @@ def main():
         c.execute(true_label)
         result = c.fetchone()
         if result[0] in target_videos:
-            if result in results:
-                index = results.index(result)
+            if result[0] in results:
+                index = results.index(result[0])
                 formula = (m - index + 1 + 1)/m 
                 print("Per-classifier accuracy value is: ", formula)
             else:
@@ -388,8 +388,8 @@ def main():
         c.execute(true_label)
         result = c.fetchone()
         if result[0] in target_videos:
-            if result in results:
-                index = results.index(result)
+            if result[0] in results:
+                index = results.index(result[0])
                 formula = (m - index + 1 + 1)/m 
                 print("Per-classifier accuracy value is: ", formula)
             else:
